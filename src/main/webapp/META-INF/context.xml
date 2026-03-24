@@ -1,0 +1,14 @@
+<Context>
+    <!-- name="jdbc/testCTF123" 이게 JNDI 이름 -->
+    <Resource
+            name="jdbc/testCTF123"
+            auth="Container"
+            type="javax.sql.DataSource"
+            driverClassName="oracle.jdbc.driver.OracleDriver"
+            url="jdbc:oracle:thin:@127.0.0.1:1521:XE"
+            username="testCTF123"
+            password="rok1403"
+            maxTotal="20"
+            maxIdle="10"
+            maxWaitMillis="-1"/>
+</Context>

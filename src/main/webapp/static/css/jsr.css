@@ -1,0 +1,577 @@
+/* ============================================================
+   JSR Shop — Main Stylesheet
+   보안 취약점 실습 쇼핑몰 전체 CSS
+   Google Fonts: Noto Sans KR + JetBrains Mono
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* ── CSS 변수 ──────────────────────────────────────────────── */
+:root {
+  --bg:           #0f172a;
+  --bg-2:         #1e293b;
+  --bg-3:         #263248;
+  --border:       #334155;
+  --border-light: #3f526b;
+
+  --text:         #e2e8f0;
+  --text-sub:     #94a3b8;
+  --text-muted:   #64748b;
+
+  --accent:       #38bdf8;
+  --accent-dark:  #0284c7;
+  --accent-glow:  rgba(56, 189, 248, 0.15);
+
+  --green:        #22c55e;
+  --green-bg:     rgba(34, 197, 94, 0.10);
+  --red:          #ef4444;
+  --red-bg:       rgba(239, 68, 68, 0.10);
+  --red-dark:     #dc2626;
+  --yellow:       #f59e0b;
+  --yellow-bg:    rgba(245, 158, 11, 0.10);
+
+  --radius:       8px;
+  --radius-lg:    12px;
+  --shadow:       0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-sm:    0 2px 8px  rgba(0, 0, 0, 0.3);
+
+  --font-body:    'Noto Sans KR', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+/* ── 리셋 & 기본 ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s, opacity 0.15s;
+}
+a:hover { color: #7dd3fc; }
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+h2 { font-size: 1.5rem; margin-bottom: 6px; }
+h3 { font-size: 1.15rem; margin: 24px 0 10px; }
+h4 { font-size: 1rem; margin: 18px 0 8px; }
+
+p { margin-bottom: 10px; }
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+
+code {
+  font-family: var(--font-mono);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 13px;
+  color: var(--accent);
+}
+
+small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+
+/* ── 레이아웃 래퍼 (.jsr-wrap) ────────────────────────────── */
+.jsr-wrap {
+  max-width: 960px;
+  margin: 36px auto 60px;
+  padding: 0 24px;
+  animation: fadeUp 0.35s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ── 카드 박스 (.jsr-box) ─────────────────────────────────── */
+/*  로그인·회원가입 중앙 카드  */
+.jsr-box {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 48px;
+  max-width: 440px;
+  margin: 80px auto 0;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 상단 액센트 라인 */
+.jsr-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #818cf8);
+}
+
+.jsr-box h2 {
+  font-size: 1.3rem;
+  margin-bottom: 4px;
+}
+
+
+/* ── 서브 텍스트 (.jsr-sub) ───────────────────────────────── */
+.jsr-sub {
+  color: var(--text-sub);
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+
+
+/* ── 힌트 / 취약점 경고 (.jsr-hint) ──────────────────────── */
+.jsr-hint {
+  background: var(--yellow-bg);
+  border: 1px solid rgba(245, 158, 11, 0.30);
+  border-left: 3px solid var(--yellow);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #fde68a;
+  line-height: 1.6;
+  margin: 12px 0 18px;
+}
+.jsr-hint code {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: var(--yellow);
+}
+
+
+/* ── 성공 메시지 (.jsr-success) ───────────────────────────── */
+.jsr-success {
+  background: var(--green-bg);
+  border: 1px solid rgba(34, 197, 94, 0.30);
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #bbf7d0;
+  margin: 12px 0;
+}
+
+
+/* ── 에러 메시지 (.jsr-error) ─────────────────────────────── */
+.jsr-error {
+  background: var(--red-bg);
+  border: 1px solid rgba(239, 68, 68, 0.30);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #fecaca;
+  margin: 12px 0;
+}
+
+
+/* ── 인풋 (.jsr-input) ────────────────────────────────────── */
+.jsr-input {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 9px 12px;
+  width: 100%;
+  max-width: 360px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  vertical-align: middle;
+}
+
+.jsr-input::placeholder { color: var(--text-muted); }
+
+.jsr-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* number 스피너 스타일 */
+input[type="number"].jsr-input,
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0.4;
+}
+
+select {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 7px 10px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+select:focus { border-color: var(--accent); }
+
+textarea {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  max-width: 480px;
+}
+textarea::placeholder { color: var(--text-muted); }
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+
+/* ── 버튼 (.jsr-btn) ──────────────────────────────────────── */
+.jsr-btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #0f172a !important;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 9px 20px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  line-height: 1.4;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.jsr-btn:hover {
+  background: #7dd3fc;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
+  color: #0f172a !important;
+}
+.jsr-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+
+/* ── 작은 버튼 (.jsr-btn-sm) ──────────────────────────────── */
+.jsr-btn-sm {
+  display: inline-block;
+  background: var(--bg-3);
+  color: var(--text) !important;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+  line-height: 1.4;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.jsr-btn-sm:hover {
+  background: var(--border);
+  border-color: var(--accent);
+  color: var(--accent) !important;
+}
+
+
+/* ── 위험 버튼 (.jsr-btn-danger) ──────────────────────────── */
+.jsr-btn-danger,
+.jsr-btn-sm.jsr-btn-danger {
+  background: var(--red-dark) !important;
+  color: #fff !important;
+  border-color: var(--red-dark) !important;
+}
+.jsr-btn-danger:hover,
+.jsr-btn-sm.jsr-btn-danger:hover {
+  background: #b91c1c !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  color: #fff !important;
+}
+
+
+/* ── 테이블 (.jsr-table) ──────────────────────────────────── */
+.jsr-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: none !important;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin: 12px 0 20px;
+  font-size: 14px;
+}
+
+.jsr-table th,
+.jsr-table td {
+  padding: 11px 14px;
+  text-align: left;
+  border: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  vertical-align: middle;
+}
+
+.jsr-table thead tr,
+.jsr-table tr:first-child {
+  background: var(--bg-3);
+}
+
+.jsr-table th {
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.jsr-table td {
+  background: var(--bg-2);
+  color: var(--text);
+}
+
+.jsr-table tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* 홀짝 줄 구분 */
+.jsr-table tbody tr:nth-child(even) td {
+  background: var(--bg-3);
+}
+
+/* 호버 하이라이트 */
+.jsr-table tbody tr:hover td {
+  background: rgba(56, 189, 248, 0.06);
+  transition: background 0.12s;
+}
+
+/* 상세 테이블 (th-td 두 컬럼 형태) */
+.jsr-table tr th:first-child:only-child,
+.jsr-table tr > th:first-child {
+  width: 160px;
+}
+
+/* 합계 행 강조 */
+.jsr-table tr:last-child td b,
+.jsr-table td b {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* 비밀번호 평문 노출 강조 (보안 실습용) */
+.jsr-table td[style*="color:red"] b {
+  color: var(--red) !important;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--red-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* 테이블 내 인풋 */
+.jsr-table input[type="number"],
+.jsr-table input[type="text"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 13px;
+  padding: 5px 8px;
+  outline: none;
+}
+.jsr-table input:focus {
+  border-color: var(--accent);
+}
+
+
+/* ── 리뷰 카드 (.jsr-review) ──────────────────────────────── */
+.jsr-review {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.jsr-review:hover { border-color: var(--border-light); }
+
+.jsr-review b {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.jsr-review p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+
+/* ── 날짜 텍스트 (.jsr-date) ──────────────────────────────── */
+.jsr-date {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-left: 8px;
+  font-family: var(--font-mono);
+}
+
+
+/* ── 폼 공통 간격 ──────────────────────────────────────────── */
+form p {
+  margin-bottom: 12px;
+}
+
+/* 라벨처럼 쓰이는 텍스트 */
+form > p > label,
+form p > span:first-child {
+  display: inline-block;
+  min-width: 72px;
+  color: var(--text-sub);
+  font-size: 14px;
+}
+
+/* 인라인 폼(테이블 내 form) 간격 제거 */
+.jsr-table form p {
+  margin: 0;
+}
+
+
+/* ── 카테고리 필터 링크 ────────────────────────────────────── */
+.jsr-wrap > p > a {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text-sub);
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  margin: 0 2px;
+}
+.jsr-wrap > p > a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
+/* 구분자 | */
+.jsr-wrap > p {
+  margin: 10px 0 16px;
+  color: var(--border-light);
+}
+
+
+/* ── 주문 완료 이모지 헤더 ────────────────────────────────── */
+h2:has(+ .jsr-table),
+.jsr-wrap h2:first-of-type {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+
+
+/* ── 관리자 대시보드 통계 카드 ────────────────────────────── */
+/* dashboard 통계 테이블 강조 */
+.jsr-wrap .jsr-table tr td:last-child {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+
+/* 대시보드 버튼 그룹 */
+.jsr-wrap > p > a.jsr-btn {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+
+/* ── 뒤로가기 링크 ────────────────────────────────────────── */
+.jsr-wrap p > a[href*="←"],
+.jsr-wrap p:last-child > a {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.jsr-wrap p > a[href*="←"]:hover,
+.jsr-wrap p:last-child > a:hover {
+  color: var(--accent);
+}
+
+
+/* ── 스크롤바 ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+
+/* ── 반응형 ────────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .jsr-wrap { padding: 0 14px; margin-top: 20px; }
+
+  .jsr-box {
+    padding: 28px 20px;
+    margin-top: 40px;
+  }
+
+  .jsr-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .jsr-input { max-width: 100%; }
+  .jsr-btn   { width: 100%; text-align: center; }
+
+  h2 { font-size: 1.2rem; }
+}
+
+
+/* ── 유틸리티 ──────────────────────────────────────────────── */
+.text-mono  { font-family: var(--font-mono); }
+.text-red   { color: var(--red); }
+.text-green { color: var(--green); }
+.text-muted { color: var(--text-muted); }
