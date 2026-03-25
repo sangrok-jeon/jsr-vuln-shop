@@ -42,7 +42,9 @@ public class LoginServlet extends HttpServlet {
                 loginUser.setPhone(rs.getString("PHONE"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            getServletContext().log("Login lookup failed.");
+        } catch (IllegalStateException e) {
+            getServletContext().log("Password verification failed.");
         } finally {
             DBUtil.close(rs, ps, conn);
         }

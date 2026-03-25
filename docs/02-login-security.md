@@ -110,6 +110,7 @@ private String filterSqli(String input) {
 - `Statement` 대신 `PreparedStatement` 사용
 - 사용자 입력을 SQL 문자열에 직접 결합하지 않기
 - 블랙리스트 필터에 의존하지 않기
+- 비밀번호 저장 구조가 해시 기반으로 바뀐 경우, 로그인 검증도 해시 비교 방식으로 함께 수정하기
 
 ### 2. 로그 처리 대응
 
@@ -118,33 +119,18 @@ private String filterSqli(String input) {
 
 ## 수정 코드 예시
 
-### 즉시 적용 가능한 SQL Injection 완화 예시
+파일: [`src/main/java/com/jsr/ctf/LoginServlet.java`](../src/main/java/com/jsr/ctf/LoginServlet.java)
 
 ```java
-String sql = "SELECT * FROM JSR_USERS WHERE USERNAME = ? AND PASSWORD = ?";
+String sql = "SELECT USER_ID, USERNAME, PASSWORD, EMAIL, ROLE, POINT, ADDRESS, PHONE "
+        + "FROM JSR_USERS WHERE USERNAME = ?";
 
 PreparedStatement ps = conn.prepareStatement(sql);
 ps.setString(1, userid);
-ps.setString(2, password);
-
-ResultSet rs = ps.executeQuery();
-```
-
-위 코드는 문자열 결합 SQL을 제거해 SQL Injection을 완화한다.
-
-### 권장 수정 예시
-
-```java
-String sql = "SELECT USER_ID, USERNAME, EMAIL, ROLE, POINT, ADDRESS, PHONE "
-        + "FROM JSR_USERS WHERE USERNAME = ? AND PASSWORD = ?";
-
-PreparedStatement ps = conn.prepareStatement(sql);
-ps.setString(1, userid);
-ps.setString(2, password);
 
 ResultSet rs = ps.executeQuery();
 
-if (rs.next()) {
+if (rs.next() && PasswordUtil.matches(password, rs.getString("PASSWORD"))) {
     loginUser = new JsrUser();
     loginUser.setUserId(rs.getLong("USER_ID"));
     loginUser.setUsername(rs.getString("USERNAME"));
@@ -155,3 +141,15 @@ if (rs.next()) {
     loginUser.setPhone(rs.getString("PHONE"));
 }
 ```
+
+## 대응 코드 동작 설명
+
+대응 코드에서는 사용자 입력을 SQL 문자열에 직접 연결하지 않고, `USERNAME`만 바인딩 값으로 조회한다. 따라서 `test001'or'1'='1` 같은 입력은 SQL 구문이 아니라 하나의 문자열 값으로 처리되어 인증 우회가 발생하지 않는다.
+
+또한 회원가입 대응에서 `PASSWORD` 컬럼에 PBKDF2 해시가 저장되므로, 로그인 과정에서는 `PasswordUtil.matches()`로 입력 비밀번호와 저장된 해시를 비교해야 한다. 이 구조로 변경하면 비밀번호를 SQL 조건절에 직접 포함할 필요가 없고, 로그인 시도 과정에서 SQL 원문과 비밀번호를 디버그 로그에 남기지 않아도 된다.
+
+## 대응 후 확인 항목
+
+- OR 조건 기반 우회 입력 시 로그인 실패
+- 정상 계정 입력 시 로그인 성공
+- 로그인 시도 시 비밀번호와 SQL 원문이 디버그 로그에 출력되지 않음
