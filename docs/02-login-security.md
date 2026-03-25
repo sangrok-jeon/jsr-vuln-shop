@@ -26,11 +26,23 @@
 - 예시: `test'--`
 - `--`, `#`, `/**/` 등 일부 주석 패턴이 제거되어 우회가 실패한다.
 
+![주석 기반 우회 입력 화면](images/02-login/01-comment-based-bypass-failure-input.png)
+
+![주석 기반 우회 실패 결과](images/02-login/02-comment-based-bypass-failure-result.png)
+
 ### 3. OR 조건 기반 우회는 성공
 
 - 예시: `test'or'1'='1`
 - 주석 제거 방식만으로는 boolean-based 조건 우회를 막지 못한다.
 - 조건식이 참이 되면서 인증 우회가 발생한다.
+
+![OR 조건 기반 우회 입력 화면](images/02-login/03-or-based-bypass-success-input.png)
+
+### 4. 로그인 우회 후 상품 페이지 진입
+
+- OR 조건 기반 입력 이후 로그인 우회가 발생하면 상품 페이지로 이동한다.
+
+![로그인 우회 성공 후 상품 페이지](images/02-login/04-login-bypass-success-products-page.png)
 
 ## 확인 로그
 
