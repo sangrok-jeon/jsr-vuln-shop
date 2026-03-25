@@ -18,65 +18,33 @@ public class LoginServlet extends HttpServlet {
 
         JsrUser loginUser = null;
         Connection conn = null;
-        Statement  stmt = null;
-        ResultSet  rs   = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
         try {
-            System.out.println("==== [DEBUG] LoginServlet doPost called ====");
-            System.out.println("[DEBUG] userid   = [" + userid + "]");
-            System.out.println("[DEBUG] password = [" + password + "]");
-
             conn = DBUtil.getConnection();
-            System.out.println("[DEBUG] conn = " + conn);
 
-            Statement checkStmt = conn.createStatement();
+            String sql = "SELECT USER_ID, USERNAME, PASSWORD, EMAIL, ROLE, POINT, ADDRESS, PHONE "
+                    + "FROM JSR_USERS WHERE USERNAME = ?";
 
-            ResultSet checkRs1 = checkStmt.executeQuery(
-                    "SELECT SYS_CONTEXT('USERENV','SESSION_USER') FROM DUAL");
-            if (checkRs1.next()) {
-                System.out.println("[DEBUG] DB USER = " + checkRs1.getString(1));
-            }
-            checkRs1.close();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, userid);
+            rs = ps.executeQuery();
 
-            ResultSet checkRs2 = checkStmt.executeQuery("SELECT COUNT(*) FROM JSR_USERS");
-            if (checkRs2.next()) {
-                System.out.println("[DEBUG] JSR_USERS COUNT = " + checkRs2.getInt(1));
-            }
-            checkRs2.close();
-            checkStmt.close();
-
-           
-            userid   = filterSqli(userid);
-            password = filterSqli(password);
-
-            String sql = "SELECT * FROM JSR_USERS "
-                    + "WHERE USERNAME = '" + userid + "' "
-                    + "AND PASSWORD = '" + password + "'";
-
-            System.out.println("[DEBUG] sql = " + sql);
-
-            stmt = conn.createStatement();
-            rs   = stmt.executeQuery(sql);
-
-            if (rs.next()) {
-                System.out.println("[DEBUG] LOGIN SUCCESS");
+            if (rs.next() && PasswordUtil.matches(password, rs.getString("PASSWORD"))) {
                 loginUser = new JsrUser();
                 loginUser.setUserId(rs.getLong("USER_ID"));
                 loginUser.setUsername(rs.getString("USERNAME"));
-                loginUser.setPassword(rs.getString("PASSWORD"));
                 loginUser.setEmail(rs.getString("EMAIL"));
                 loginUser.setRole(rs.getString("ROLE"));
                 loginUser.setPoint(rs.getInt("POINT"));
                 loginUser.setAddress(rs.getString("ADDRESS"));
                 loginUser.setPhone(rs.getString("PHONE"));
-            } else {
-                System.out.println("[DEBUG] LOGIN FAIL - no row");
             }
         } catch (SQLException e) {
-                System.out.println("[DEBUG] sqlState = " + e.getSQLState());
             e.printStackTrace();
         } finally {
-            DBUtil.close(rs, stmt, conn);
+            DBUtil.close(rs, ps, conn);
         }
 
         if (loginUser != null) {
@@ -98,26 +66,5 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         request.getRequestDispatcher("/WEB-INF/views/login.jsp")
                .forward(request, response);
-    }
-
-    /**
-     * ⚠️ 불완전한 SQLi 필터링
-     *
-     * 차단: --, #, 인라인주석
-     * 통과: ' OR '1'='1 (주석 없이 따옴표로 닫기)
-     *
-     * 공격 시나리오:
-     *   admin'--   → -- 제거 후 문법 오류 (차단)
-     *   ' OR '1'='1 → 주석 없이 통과 → 전체 유저 반환 → 로그인 성공
-     */
-    private String filterSqli(String input) {
-        if (input == null) return input;
-        // -- 주석 차단
-        input = input.replaceAll("--", "");
-        // # 주석 차단
-        input = input.replaceAll("#", "");
-        // /**/ 주석 차단
-        input = input.replaceAll("/\\*.*?\\*/", "");
-        return input;
     }
 }
