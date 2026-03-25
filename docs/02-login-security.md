@@ -110,7 +110,6 @@ private String filterSqli(String input) {
 - `Statement` 대신 `PreparedStatement` 사용
 - 사용자 입력을 SQL 문자열에 직접 결합하지 않기
 - 블랙리스트 필터에 의존하지 않기
-- 비밀번호 저장 구조가 해시 기반으로 바뀐 경우, 로그인 검증도 해시 비교 방식으로 함께 수정하기
 
 ### 2. 로그 처리 대응
 
@@ -146,10 +145,30 @@ if (rs.next() && PasswordUtil.matches(password, rs.getString("PASSWORD"))) {
 
 대응 코드에서는 사용자 입력을 SQL 문자열에 직접 연결하지 않고, `USERNAME`만 바인딩 값으로 조회한다. 따라서 `test001'or'1'='1` 같은 입력은 SQL 구문이 아니라 하나의 문자열 값으로 처리되어 인증 우회가 발생하지 않는다.
 
-또한 회원가입 대응에서 `PASSWORD` 컬럼에 PBKDF2 해시가 저장되므로, 로그인 과정에서는 `PasswordUtil.matches()`로 입력 비밀번호와 저장된 해시를 비교해야 한다. 이 구조로 변경하면 비밀번호를 SQL 조건절에 직접 포함할 필요가 없고, 로그인 시도 과정에서 SQL 원문과 비밀번호를 디버그 로그에 남기지 않아도 된다.
+현재 `patched` 브랜치 예시에는 `PasswordUtil.matches()`가 포함되어 있지만, 이는 비밀번호 저장 방식에 맞춘 검증 로직이다. 로그인 SQL Injection 자체를 막는 핵심은 문자열 결합 SQL을 제거하고 `PreparedStatement`로 입력값을 바인딩하는 구조로 바꾸는 데 있다.
 
-## 대응 후 확인 항목
+## 대응 후 증적자료
 
-- OR 조건 기반 우회 입력 시 로그인 실패
-- 정상 계정 입력 시 로그인 성공
-- 로그인 시도 시 비밀번호와 SQL 원문이 디버그 로그에 출력되지 않음
+### 1. OR 조건 기반 우회 입력 시도
+
+- 대응 코드 적용 후 동일한 OR 조건 기반 입력으로 다시 로그인 시도를 수행하였다.
+
+![OR 조건 기반 우회 입력 시도](images/02-login/06-or-based-bypass-attempt-fixed.png)
+
+### 2. OR 조건 기반 우회 실패
+
+- 동일 입력에 대해 로그인 실패 메시지가 출력되며 인증 우회가 발생하지 않음을 확인하였다.
+
+![OR 조건 기반 우회 실패 결과](images/02-login/07-or-based-bypass-failed-result.png)
+
+### 3. 정상 계정 로그인 입력
+
+- 정상 계정 정보로 로그인 시도를 수행하였다.
+
+![정상 계정 로그인 입력](images/02-login/08-normal-login-input.png)
+
+### 4. 정상 계정 로그인 성공
+
+- 정상 계정은 기존과 같이 상품 페이지로 로그인된다.
+
+![정상 계정 로그인 성공](images/02-login/09-normal-login-success-products-page.png)
