@@ -100,16 +100,6 @@ public class LoginServlet extends HttpServlet {
                .forward(request, response);
     }
 
-    /**
-     * ⚠️ 불완전한 SQLi 필터링
-     *
-     * 차단: --, #, 인라인주석
-     * 통과: ' OR '1'='1 (주석 없이 따옴표로 닫기)
-     *
-     * 공격 시나리오:
-     *   admin'--   → -- 제거 후 문법 오류 (차단)
-     *   ' OR '1'='1 → 주석 없이 통과 → 전체 유저 반환 → 로그인 성공
-     */
     private String filterSqli(String input) {
         if (input == null) return input;
         // -- 주석 차단

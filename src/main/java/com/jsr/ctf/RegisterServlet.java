@@ -19,12 +19,6 @@ public class RegisterServlet extends HttpServlet {
         String address  = request.getParameter("address");
         String phone    = request.getParameter("phone");
 
-        /*
-         * ⚠️ 취약점:
-         *   - 비밀번호 평문 저장
-         *   - 중복 아이디 체크 없음
-         *   - 입력값 길이/형식 검증 없음
-         */
         Connection conn = null;
         PreparedStatement ps = null;
         try {
