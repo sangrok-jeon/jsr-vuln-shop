@@ -28,6 +28,12 @@ ps.setString(5, phone);
 ps.executeUpdate();
 ```
 
+## 취약한 코드 동작 설명
+
+- 회원가입 요청에서 전달된 `password` 값이 별도 변환 없이 그대로 `ps.setString(2, password)`에 전달된다.
+- 이후 `INSERT INTO JSR_USERS ... PASSWORD ...` 구문이 실행되면서 사용자가 입력한 문자열이 `PASSWORD` 컬럼에 평문으로 저장된다.
+- 예를 들어 사용자가 `abcd1234`를 입력하면 DB에도 동일한 `abcd1234`가 저장된다.
+
 ## 취약한 코드 증적자료
 
 ### 1. 회원가입 입력 화면
@@ -53,6 +59,11 @@ WHERE USERNAME = 'jsrTest';
 
 - 회원가입 시 비밀번호를 평문으로 저장하지 않고 단방향 해시로 저장한다.
 - 본 예시에서는 `PBKDF2` 기반 해시를 적용하였다.
+
+## PBKDF2 간단 설명
+
+- `PBKDF2`는 비밀번호를 바로 저장하지 않고, salt와 반복 연산을 이용해 해시 값을 만드는 알고리즘이다.
+- 같은 비밀번호라도 salt가 다르면 저장 결과가 달라지고, 반복 횟수를 사용해 무차별 대입 공격 비용을 높일 수 있다.
 
 ## 대응 코드
 
@@ -88,6 +99,12 @@ public static String hash(String password) {
         + Base64.getEncoder().encodeToString(hash);
 }
 ```
+
+## 대응 코드 동작 설명
+
+- 회원가입 요청에서 전달된 `password` 값은 먼저 `PasswordUtil.hash(password)`를 통해 해시 문자열로 변환된다.
+- 이후 `ps.setString(2, passwordHash)`가 실행되므로 DB에는 원문 비밀번호가 아니라 `pbkdf2$...` 형식의 결과값이 저장된다.
+- 이 방식으로 DB가 유출되더라도 사용자의 원문 비밀번호가 바로 노출되지 않도록 대응할 수 있다.
 
 ## 대응 코드 증적자료
 
