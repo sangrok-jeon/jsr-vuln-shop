@@ -32,7 +32,7 @@ ps.executeUpdate();
 
 ### 1. 회원가입 입력 화면
 
-![회원가입 입력 화면](../images/01-register/01-register-form-filled.png)
+![회원가입 입력 화면](images/01-register/01-register-form-filled.png)
 
 ### 2. DB 평문 저장 확인
 
@@ -42,7 +42,7 @@ FROM JSR_USERS
 WHERE USERNAME = 'jsrTest';
 ```
 
-![평문 비밀번호 저장 확인](../images/01-register/03-db-plaintext-password.png)
+![평문 비밀번호 저장 확인](images/01-register/03-db-plaintext-password.png)
 
 ## 영향
 
@@ -93,7 +93,7 @@ public static String hash(String password) {
 
 ### 1. 회원가입 입력 화면
 
-![대응 후 회원가입 입력 화면](../images/01-register/04-register-form-filled-fixed.png)
+![대응 후 회원가입 입력 화면](images/01-register/04-register-form-filled-fixed.png)
 
 ### 2. DB 해시 저장 확인
 
@@ -103,7 +103,7 @@ FROM JSR_USERS
 WHERE USERNAME = 'test001';
 ```
 
-![해시 비밀번호 저장 확인](../images/01-register/05-db-hashed-password.png)
+![해시 비밀번호 저장 확인](images/01-register/05-db-hashed-password.png)
 
 ## 확인 내용
 
