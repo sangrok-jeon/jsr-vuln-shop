@@ -21,9 +21,7 @@
 
 ## 문서 목록
 
-| No | 기능 | 취약점 | 진입점 | 문서 |
+| No | 문서 | 포함 취약점 | 진입점 | 경로 |
 | --- | --- | --- | --- | --- |
-| 1 | Register | Plaintext Password Storage | `/jsr/register` | [`docs/01-register-security.md`](docs/01-register-security.md) |
-| 2 | Register | Input Validation Missing | `/jsr/register` | [`docs/01-register-security.md`](docs/01-register-security.md) |
-| 3 | Login | SQL Injection | `/jsr/login` | [`docs/02-login-security.md`](docs/02-login-security.md) |
-| 4 | Login | Sensitive Debug Logging | `/jsr/login` | [`docs/02-login-security.md`](docs/02-login-security.md) |
+| 1 | Register Security | Plaintext Password Storage, Input Validation Missing | `/jsr/register` | [`docs/01-register-security.md`](docs/01-register-security.md) |
+| 2 | Login Security | SQL Injection, Sensitive Debug Logging | `/jsr/login` | [`docs/02-login-security.md`](docs/02-login-security.md) |
