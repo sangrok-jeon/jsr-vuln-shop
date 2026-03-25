@@ -59,7 +59,7 @@ public class ProductDetailServlet extends HttpServlet {
                 r.setProductId(productId);
                 r.setUserId(rs.getLong("USER_ID"));
                 r.setUsername(rs.getString("USERNAME"));
-                r.setContent(rs.getString("CONTENT")); // ⚠️ XSS 필터링 없음
+                r.setContent(rs.getString("CONTENT"));
                 r.setRating(rs.getInt("RATING"));
                 r.setCreatedAt(rs.getString("CREATED_AT"));
                 reviews.add(r);
@@ -87,16 +87,14 @@ public class ProductDetailServlet extends HttpServlet {
             return;
         }
 
-        // ⚠️ IDOR: 구매자 검증 없음 → Burp로 직접 POST 시 비구매자도 리뷰 등록 가능
         long   productId = Long.parseLong(request.getParameter("productId"));
-        String content   = request.getParameter("content");  // ⚠️ XSS 필터링 없음
+        String content   = request.getParameter("content");
         int    rating    = Integer.parseInt(request.getParameter("rating"));
 
         Connection conn = null;
         PreparedStatement ps = null;
         try {
             conn = DBUtil.getConnection();
-            // ⚠️ CSRF 토큰 없음
             ps = conn.prepareStatement(
                 "INSERT INTO JSR_REVIEWS (REVIEW_ID,PRODUCT_ID,USER_ID,USERNAME,CONTENT,RATING,CREATED_AT) " +
                 "VALUES (JSR_REVIEW_SEQ.NEXTVAL,?,?,?,?,?,SYSDATE)");

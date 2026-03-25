@@ -35,7 +35,6 @@ public class OrderServlet extends HttpServlet {
                    .forward(request, response);
 
         } else if (path.equals("/order/detail")) {
-            // ⚠️ IDOR: 소유자 검증 없음 → orderId 변조로 타인 주문 조회 가능
             long orderId = Long.parseLong(request.getParameter("orderId"));
             request.setAttribute("jsrOrder", getOrderById(orderId));
             request.getRequestDispatcher("/WEB-INF/views/order_detail_view.jsp")
@@ -80,8 +79,8 @@ public class OrderServlet extends HttpServlet {
 
         long   productId  = Long.parseLong(request.getParameter("productId"));
         int    quantity   = Integer.parseInt(request.getParameter("quantity"));
-        int    price      = Integer.parseInt(request.getParameter("price"));       // ⚠️ 가격 변조 취약점
-        int    totalPrice = Integer.parseInt(request.getParameter("totalPrice"));  // ⚠️ 검증 없음
+        int    price      = Integer.parseInt(request.getParameter("price"));
+        int    totalPrice = Integer.parseInt(request.getParameter("totalPrice"));
         String address    = request.getParameter("address");
         if (address == null || address.isEmpty()) address = user.getAddress();
 
@@ -92,7 +91,6 @@ public class OrderServlet extends HttpServlet {
         int currentPoint = getUserPoint(user.getUserId());
 
         if (currentPoint < totalPrice) {
-            // ⚠️ 포인트 부족 → 결제 불가
             // totalPrice는 클라이언트 전송값(변조 가능) 그대로 비교 → 가격 변조 시 통과 가능
             if (productId > 0) {
                 request.setAttribute("jsrProduct", product);
@@ -121,7 +119,6 @@ public class OrderServlet extends HttpServlet {
         try {
             conn = DBUtil.getConnection();
 
-            // 1. 주문 INSERT (⚠️ price/totalPrice = 클라이언트 값 그대로)
             ps = conn.prepareStatement(
                 "INSERT INTO JSR_ORDERS " +
                 "(ORDER_ID,USER_ID,USERNAME,PRODUCT_ID,PRODUCT_NAME,QUANTITY,PRICE,TOTAL_PRICE,STATUS,ADDRESS,CREATED_AT) " +
@@ -139,7 +136,6 @@ public class OrderServlet extends HttpServlet {
             rs = ps.getGeneratedKeys();
             if (rs.next()) orderId = rs.getLong(1);
 
-            // 2. 포인트 차감 (⚠️ 변조된 totalPrice만큼만 차감 → 가격 변조 시 이득)
             DBUtil.close(rs, ps);
             ps = conn.prepareStatement(
                 "UPDATE JSR_USERS SET POINT = POINT - ? WHERE USER_ID = ?");
@@ -197,7 +193,6 @@ public class OrderServlet extends HttpServlet {
         Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
-            // ⚠️ IDOR: WHERE USER_ID 조건 없음
             ps = conn.prepareStatement(
                 "SELECT o.*, p.IMAGE_URL FROM JSR_ORDERS o " +
                 "LEFT JOIN JSR_PRODUCTS p ON o.PRODUCT_ID = p.PRODUCT_ID " +

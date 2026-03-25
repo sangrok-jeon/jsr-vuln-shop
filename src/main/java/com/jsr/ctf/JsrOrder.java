@@ -7,8 +7,8 @@ public class JsrOrder {
     private long   productId;
     private String productName;
     private int    quantity;
-    private int    price;       // ⚠️ 클라이언트 전송값 그대로
-    private int    totalPrice;  // ⚠️ 서버 검증 없음
+    private int    price;
+    private int    totalPrice;
     private String status;
     private String address;
     private String createdAt;

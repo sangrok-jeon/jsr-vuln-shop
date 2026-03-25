@@ -5,7 +5,7 @@ public class JsrReview {
     private long   productId;
     private long   userId;
     private String username;
-    private String content;  // ⚠️ XSS 필터링 없음
+    private String content;
     private int    rating;
     private String createdAt;
 

@@ -20,7 +20,6 @@ import java.util.List;
 )
 public class BoardServlet extends HttpServlet {
 
-    // 업로드 허용 확장자 (⚠️ Content-Type만 체크 → Burp로 우회 가능)
     private static final String[] ALLOWED_CONTENT_TYPES = {
         "image/jpeg", "image/png", "image/gif"
     };
@@ -55,7 +54,6 @@ public class BoardServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/board?error=notfound");
                 return;
             }
-            // ⚠️ IDOR: INQUIRY라도 boardId만으로 조회 가능 (소유자 체크 없음)
             if ("INQUIRY".equals(board.getBoardType())) {
                 if (!isAdmin && board.getUserId() != user.getUserId()) {
                     response.sendRedirect(request.getContextPath()
@@ -76,14 +74,12 @@ public class BoardServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/board");
                 return;
             }
-            // ⚠️ IDOR: 소유자 확인 없음
             request.setAttribute("jsrBoard", board);
             request.setAttribute("writeType", board.getBoardType());
             request.getRequestDispatcher("/WEB-INF/views/board_write_view.jsp")
                    .forward(request, response);
 
         } else if (path.equals("/board/delete")) {
-            // ⚠️ IDOR: 소유자 확인 없음
             long boardId = Long.parseLong(request.getParameter("boardId"));
             JsrBoard board = getBoardById(boardId);
             String type = (board != null) ? board.getBoardType() : "INQUIRY";
@@ -141,8 +137,6 @@ public class BoardServlet extends HttpServlet {
         String path = request.getServletPath();
 
         if (path.equals("/board/write")) {
-            // ⚠️ Stored XSS: 이스케이프 없음
-            // ⚠️ CSRF: 토큰 없음
             String type    = request.getParameter("boardType");
             String title   = request.getParameter("title");
             String content = request.getParameter("content");
@@ -168,7 +162,6 @@ public class BoardServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/board/detail?boardId=" + boardId);
 
         } else if (path.equals("/board/edit")) {
-            // ⚠️ IDOR: 소유자 확인 없음
             long   boardId = Long.parseLong(request.getParameter("boardId"));
             String title   = request.getParameter("title");
             String content = request.getParameter("content");
@@ -187,7 +180,6 @@ public class BoardServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/board/detail?boardId=" + boardId);
 
         } else if (path.equals("/board/answer")) {
-            // ⚠️ 수직 권한 상승: hidden 필드 role 신뢰
             long   boardId = Long.parseLong(request.getParameter("boardId"));
             String content = request.getParameter("content");
             String role    = request.getParameter("role");
@@ -205,23 +197,9 @@ public class BoardServlet extends HttpServlet {
         }
     }
 
-    /**
-     * ⚠️ 파일 업로드 취약점 핵심
-     *
-     * 검증 1: Content-Type이 image/* 인지 확인
-     *   → Burp Suite로 Content-Type을 image/jpeg로 변조하면 우회 가능
-     *
-     * 검증 2: 확장자를 .jpg/.png/.gif 로만 허용
-     *   → 파일명을 shell.jsp로 하되 Content-Type을 image/jpeg로 보내면 통과
-     *   → 실제로는 확장자 검증이 Content-Type 통과 후에만 실행됨
-     *
-     * 저장 경로: webapp/uploads/ (웹에서 직접 접근 가능)
-     *   → /uploads/shell.jsp 접근 시 Tomcat이 JSP로 실행
-     */
     private String handleFileUpload(Part filePart, HttpServletRequest request) throws IOException {
         String contentType = filePart.getContentType();
 
-        // 검증 1: Content-Type 체크 (⚠️ Burp로 변조 가능)
         boolean allowed = false;
         for (String ct : ALLOWED_CONTENT_TYPES) {
             if (ct.equals(contentType)) { allowed = true; break; }
@@ -232,7 +210,6 @@ public class BoardServlet extends HttpServlet {
         String originalName = extractFileName(filePart);
         if (originalName == null || originalName.isEmpty()) return null;
 
-        // 검증 2: 확장자 체크 (⚠️ Content-Type 변조로 이미 통과했다면 이 검증도 의미없음)
         String ext = "";
         int dotIdx = originalName.lastIndexOf(".");
         if (dotIdx >= 0) ext = originalName.substring(dotIdx).toLowerCase();
@@ -335,7 +312,6 @@ public class BoardServlet extends HttpServlet {
         Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
-            // ⚠️ IDOR: USER_ID 조건 없음
             ps = conn.prepareStatement("SELECT * FROM JSR_BOARD WHERE BOARD_ID=?");
             ps.setLong(1, boardId);
             rs = ps.executeQuery();
@@ -358,8 +334,8 @@ public class BoardServlet extends HttpServlet {
             ps.setLong(1, userId);
             ps.setString(2, username);
             ps.setString(3, type);
-            ps.setString(4, title);   // ⚠️ XSS
-            ps.setString(5, content); // ⚠️ XSS
+            ps.setString(4, title);
+            ps.setString(5, content);
             ps.setString(6, attachFile);
             ps.executeUpdate();
             rs = ps.getGeneratedKeys();

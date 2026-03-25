@@ -30,11 +30,6 @@ public class ProductServlet extends HttpServlet {
             conn = DBUtil.getConnection();
 
             if (!keyword.isEmpty()) {
-                /*
-                 * ⚠️ SQL Injection 취약 검색
-                 * 공격 예시:
-                 *   ' UNION SELECT USER_ID,USERNAME,PASSWORD,EMAIL,ROLE,POINT,NULL,NULL FROM JSR_USERS--
-                 */
                 String sql = "SELECT * FROM JSR_PRODUCTS "
                            + "WHERE NAME LIKE '%" + keyword + "%' "
                            + "OR DESCRIPTION LIKE '%" + keyword + "%' "

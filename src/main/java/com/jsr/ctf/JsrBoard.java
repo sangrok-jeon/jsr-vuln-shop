@@ -9,7 +9,7 @@ public class JsrBoard {
     private String content;
     private String createdAt;
     private JsrAnswer answer;
-    private String attachFile; // ⚠️ 업로드된 파일명 (웹쉘 가능)
+    private String attachFile;
 
     public long      getBoardId()    { return boardId; }
     public long      getUserId()     { return userId; }

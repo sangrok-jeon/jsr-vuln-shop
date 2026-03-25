@@ -12,7 +12,6 @@ import java.util.List;
 public class PointServlet extends HttpServlet {
 
     // ── 정상 제한값 (서버사이드 검증) ──────────────────────────
-    // ⚠️ CTF 취약점: Burp Suite로 amount 파라미터 변조 시 아래 검증 우회 가능
     private static final int MAX_CHARGE_ONCE = 100_000;   // 1회 최대 충전 10만P
     private static final int MAX_POINT_TOTAL = 500_000;   // 최대 보유 50만P
 
@@ -76,13 +75,11 @@ public class PointServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/point?error=negative");
                 return;
             }
-            // 검증 2: 1회 한도 초과 차단  ← ⚠️ Burp로 amount 변조 시 우회 가능
             if (amount > MAX_CHARGE_ONCE) {
                 response.sendRedirect(request.getContextPath()
                     + "/point?error=overlimit&limit=" + MAX_CHARGE_ONCE);
                 return;
             }
-            // 검증 3: 최대 보유 초과 차단  ← ⚠️ 마찬가지로 우회 가능
             if (fresh.getPoint() + amount > MAX_POINT_TOTAL) {
                 response.sendRedirect(request.getContextPath()
                     + "/point?error=maxpoint&max=" + MAX_POINT_TOTAL
@@ -103,7 +100,6 @@ public class PointServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/point?error=negative");
                 return;
             }
-            // ⚠️ 의도적 취약점: 잔액 초과 사용 허용 → 음수 포인트 가능
             int newPoint = fresh.getPoint() - amount;
             updatePoint(user.getUserId(), newPoint);
             saveHistory(user.getUserId(), "USE", amount, newPoint, "포인트 사용");

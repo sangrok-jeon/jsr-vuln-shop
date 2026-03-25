@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class JsrUser implements Serializable {
     private long   userId;
     private String username;
-    private String password;  // ⚠️ 평문 저장
+    private String password;
     private String email;
     private String role;      // USER / ADMIN
     private int    point;
