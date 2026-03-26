@@ -79,11 +79,12 @@ private boolean checkLogin(HttpServletRequest request, HttpServletResponse respo
 
 ## 취약한 코드 증적자료
 
-### 1. 마이페이지 수정 요청 원본 확인
+### 1. 권한 변조 대상 파라미터 확인
 
 - 일반 사용자의 마이페이지 수정 요청에 `userId=51`, `role=USER`가 함께 포함된 것을 확인하였다.
+- 이 요청에서 `role` 파라미터가 실제 권한 변조 대상이며, Burp Suite에서 `USER`를 `ADMIN`으로 변경해 전송할 수 있다.
 
-![마이페이지 수정 요청 원본](images/03-privilege-escalation/01-mypage-update-original-request.png)
+![권한 변조 대상 role 파라미터 확인](images/03-privilege-escalation/01-mypage-update-original-request.png)
 
 ### 2. 권한 상승 전 일반 사용자 상태
 
