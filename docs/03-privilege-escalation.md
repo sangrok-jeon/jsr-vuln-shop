@@ -167,3 +167,14 @@ private boolean checkAdmin(HttpServletRequest request, HttpServletResponse respo
 - 대응 코드에서는 권한 관련 값인 `role`, `userId`를 클라이언트 요청에서 받지 않는다.
 - 마이페이지 수정은 현재 로그인된 세션 사용자 ID만 사용하므로, Burp Suite로 `role=ADMIN`을 추가하거나 변조해도 권한 변경에 사용되지 않는다.
 - 관리자 페이지는 세션의 실제 권한이 `ADMIN`인지 서버에서 다시 검증하므로, 일반 사용자 세션으로는 `/admin/dashboard`에 직접 접근할 수 없다.
+
+## 대응 후 증적자료
+
+`patched` 브랜치 기준으로 아래 항목을 순서대로 다시 캡처하면 대응 증적을 정리할 수 있다.
+
+- `05-role-tampering-attempt-fixed.png`
+  - `role=ADMIN` 변조 요청 재시도 화면
+- `06-role-tampering-blocked-result.png`
+  - 마이페이지 권한이 `USER`로 유지되는 결과 화면
+- `07-admin-dashboard-access-blocked.png`
+  - 일반 사용자 세션으로 `/admin/dashboard` 접근이 차단되는 결과 화면
