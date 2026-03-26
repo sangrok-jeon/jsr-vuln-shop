@@ -150,8 +150,6 @@
         <div class="form-card">
             <h3>✏️ 기본 정보 수정</h3>
 <form method="post" action="<%= request.getContextPath() %>/mypage/update">
-<input type="hidden" name="userId" value="${jsrUser.userId}">
-                <input type="hidden" name="role"   value="${jsrUser.role}">
                 <div class="form-field">
                     <label>이메일</label>
                     <input type="email" name="email" value="${jsrUser.email}" class="jsr-input">

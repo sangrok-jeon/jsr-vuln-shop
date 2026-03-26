@@ -43,45 +43,16 @@ public class MypageServlet extends HttpServlet {
         String path = request.getServletPath();
 
         if (path.equals("/mypage/update")) {
-            // ⚠️ CSRF: 토큰 검증 없음
             String email   = request.getParameter("email");
             String address = request.getParameter("address");
             String phone   = request.getParameter("phone");
             updateUserInfo(user.getUserId(), email, address, phone);
-
-            /**
-             * ⚠️ 수직 권한 상승 취약점 핵심:
-             *
-             * mypage_view.jsp 기본정보 수정 폼에는 다음 hidden 필드가 포함됨:
-             *   <input type="hidden" name="userId" value="2">
-             *   <input type="hidden" name="role"   value="USER">
-             *
-             * 서버는 세션이 아닌 클라이언트가 전송한 role 파라미터를 DB에 반영.
-             * 공격 시나리오:
-             *   1. Ctrl+U 소스 보기로 hidden 필드 발견
-             *   2. Burp Suite로 요청 가로채기
-             *   3. role=USER → role=ADMIN 으로 변조 후 전송
-             *   4. 일반 유저 → 관리자 승격 완료
-             */
-            String roleParam   = request.getParameter("role");
-            String userIdParam = request.getParameter("userId");
-            if (roleParam != null && userIdParam != null) {
-                try {
-                    long targetId = Long.parseLong(userIdParam);
-                    updateRole(targetId, roleParam); // ⚠️ 파라미터 그대로 신뢰
-                    if (user.getUserId() == targetId) {
-                        user.setRole(roleParam);
-                        request.getSession().setAttribute("jsrUser", user);
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
 
             JsrUser fresh = getUserById(user.getUserId());
             request.getSession().setAttribute("jsrUser", fresh);
             response.sendRedirect(request.getContextPath() + "/mypage?updated=1");
 
         } else if (path.equals("/mypage/pw_change")) {
-            // ⚠️ CSRF: 현재 비밀번호 확인 없음, 토큰 없음
             String newPassword = request.getParameter("password");
             updatePassword(user.getUserId(), newPassword);
             response.sendRedirect(request.getContextPath() + "/mypage?pwChanged=1");
@@ -126,24 +97,12 @@ public class MypageServlet extends HttpServlet {
         finally { DBUtil.close(ps, conn); }
     }
 
-    private void updateRole(long userId, String role) {
-        Connection conn = null; PreparedStatement ps = null;
-        try {
-            conn = DBUtil.getConnection();
-            ps = conn.prepareStatement("UPDATE JSR_USERS SET ROLE=? WHERE USER_ID=?");
-            ps.setString(1, role); // ⚠️ 클라이언트 전송값 그대로 신뢰
-            ps.setLong(2, userId);
-            ps.executeUpdate(); 
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(ps, conn); }
-    }
-
     private void updatePassword(long userId, String password) {
         Connection conn = null; PreparedStatement ps = null;
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement("UPDATE JSR_USERS SET PASSWORD=? WHERE USER_ID=?");
-            ps.setString(1, password); // ⚠️ 평문 저장
+            ps.setString(1, password);
             ps.setLong(2, userId);
             ps.executeUpdate(); 
         } catch (SQLException e) { e.printStackTrace(); }

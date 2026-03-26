@@ -15,17 +15,17 @@ import java.util.List;
              "/admin/orders", "/admin/order_status"})
 public class AdminServlet extends HttpServlet {
 
-    /**
-     * ⚠️ 수직 권한 상승 취약점 — 로그인 여부만 확인, ROLE 검증 없음
-     * 일반 USER 계정으로 /admin/* 직접 접근 가능
-     */
-    private boolean checkLogin(HttpServletRequest request, HttpServletResponse response)
+    private boolean checkAdmin(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        if (request.getSession().getAttribute("jsrUser") == null) {
+        JsrUser user = (JsrUser) request.getSession().getAttribute("jsrUser");
+        if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return false;
         }
-        // ← ADMIN role 확인 코드 없음! (의도적 취약점)
+        if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/products");
+            return false;
+        }
         return true;
     }
 
@@ -33,7 +33,7 @@ public class AdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!checkLogin(request, response)) return;
+        if (!checkAdmin(request, response)) return;
         String path = request.getServletPath();
 
         if (path.equals("/admin/users")) {
@@ -66,7 +66,7 @@ public class AdminServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!checkLogin(request, response)) return;
+        if (!checkAdmin(request, response)) return;
         String path = request.getServletPath();
 
         if (path.equals("/admin/user_point")) {
@@ -81,17 +81,8 @@ public class AdminServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/users?deleted=1");
 
         } else if (path.equals("/admin/user_role")) {
-            /**
-             * ⚠️ 수직 권한 상승 취약점 — hidden 필드 변조 방식
-             *
-             * mypage_view.jsp 의 마이페이지 폼에는 다음 hidden 필드가 숨겨져 있음:
-             *   <input type="hidden" name="role" value="USER">
-             *
-             * 서버는 세션의 role이 아닌 이 파라미터를 그대로 신뢰함.
-             * → Ctrl+U(소스 보기)로 발견 후 Burp로 role=ADMIN 변조 시 권한 상승 성공
-             */
             long   userId = Long.parseLong(request.getParameter("userId"));
-            String role   = request.getParameter("role"); // ⚠️ 클라이언트 전송값 그대로 신뢰
+            String role   = request.getParameter("role");
             exec("UPDATE JSR_USERS SET ROLE=? WHERE USER_ID=?", role, userId);
 
             // 본인 세션도 즉시 반영
@@ -158,7 +149,7 @@ public class AdminServlet extends HttpServlet {
                 JsrUser u = new JsrUser();
                 u.setUserId(rs.getLong("USER_ID"));
                 u.setUsername(rs.getString("USERNAME"));
-                u.setPassword(rs.getString("PASSWORD")); // ⚠️ 평문 노출
+                u.setPassword(rs.getString("PASSWORD"));
                 u.setEmail(rs.getString("EMAIL"));
                 u.setRole(rs.getString("ROLE"));
                 u.setPoint(rs.getInt("POINT"));
