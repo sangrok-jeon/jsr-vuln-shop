@@ -31,7 +31,19 @@ public class LoginServlet extends HttpServlet {
             ps.setString(1, userid);
             rs = ps.executeQuery();
 
-            if (rs.next() && PasswordUtil.matches(password, rs.getString("PASSWORD"))) {
+            if (rs.next()) {
+                String storedPassword = rs.getString("PASSWORD");
+                boolean matched = PasswordUtil.matches(password, storedPassword);
+
+                if (matched && !PasswordUtil.isHashed(storedPassword)) {
+                    migrateLegacyPassword(conn, rs.getLong("USER_ID"), password);
+                }
+
+                if (!matched) {
+                    response.sendRedirect(request.getContextPath() + "/login?error=1");
+                    return;
+                }
+
                 loginUser = new JsrUser();
                 loginUser.setUserId(rs.getLong("USER_ID"));
                 loginUser.setUsername(rs.getString("USERNAME"));
@@ -68,5 +80,19 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         request.getRequestDispatcher("/WEB-INF/views/login.jsp")
                .forward(request, response);
+    }
+
+    private void migrateLegacyPassword(Connection conn, long userId, String rawPassword)
+            throws SQLException {
+        PreparedStatement updatePs = null;
+        try {
+            updatePs = conn.prepareStatement(
+                    "UPDATE JSR_USERS SET PASSWORD = ? WHERE USER_ID = ?");
+            updatePs.setString(1, PasswordUtil.hash(rawPassword));
+            updatePs.setLong(2, userId);
+            updatePs.executeUpdate();
+        } finally {
+            DBUtil.close(updatePs, null);
+        }
     }
 }

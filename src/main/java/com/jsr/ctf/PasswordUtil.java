@@ -32,17 +32,26 @@ public final class PasswordUtil {
             return false;
         }
 
-        String[] parts = storedHash.split("\\$");
-        if (parts.length != 4 || !"pbkdf2".equals(parts[0])) {
-            return false;
+        if (!isHashed(storedHash)) {
+            return rawPassword.equals(storedHash);
         }
 
+        String[] parts = storedHash.split("\\$");
         int iterations = Integer.parseInt(parts[1]);
         byte[] salt = Base64.getDecoder().decode(parts[2]);
         byte[] expected = Base64.getDecoder().decode(parts[3]);
         byte[] actual = derive(rawPassword.toCharArray(), salt, iterations, expected.length * 8);
 
         return slowEquals(expected, actual);
+    }
+
+    public static boolean isHashed(String storedHash) {
+        if (storedHash == null) {
+            return false;
+        }
+
+        String[] parts = storedHash.split("\\$");
+        return parts.length == 4 && "pbkdf2".equals(parts[0]);
     }
 
     private static byte[] derive(char[] password, byte[] salt, int iterations, int keyLength) {

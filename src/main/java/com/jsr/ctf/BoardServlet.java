@@ -20,7 +20,6 @@ import java.util.List;
 )
 public class BoardServlet extends HttpServlet {
 
-    // 업로드 허용 확장자 (⚠️ Content-Type만 체크 → Burp로 우회 가능)
     private static final String[] ALLOWED_CONTENT_TYPES = {
         "image/jpeg", "image/png", "image/gif"
     };
@@ -55,7 +54,6 @@ public class BoardServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/board?error=notfound");
                 return;
             }
-            // ⚠️ IDOR: INQUIRY라도 boardId만으로 조회 가능 (소유자 체크 없음)
             if ("INQUIRY".equals(board.getBoardType())) {
                 if (!isAdmin && board.getUserId() != user.getUserId()) {
                     response.sendRedirect(request.getContextPath()
@@ -73,31 +71,47 @@ public class BoardServlet extends HttpServlet {
             long boardId = Long.parseLong(request.getParameter("boardId"));
             JsrBoard board = getBoardById(boardId);
             if (board == null) {
-                response.sendRedirect(request.getContextPath() + "/board");
+                response.sendRedirect(request.getContextPath() + "/board?error=notfound");
                 return;
             }
-            // ⚠️ IDOR: 소유자 확인 없음
+            if (!canManageBoard(board, user, isAdmin)) {
+                response.sendRedirect(request.getContextPath()
+                    + "/board?error=" + getBoardAccessError(board, isAdmin) + "&boardId=" + boardId);
+                return;
+            }
             request.setAttribute("jsrBoard", board);
             request.setAttribute("writeType", board.getBoardType());
             request.getRequestDispatcher("/WEB-INF/views/board_write_view.jsp")
                    .forward(request, response);
 
         } else if (path.equals("/board/delete")) {
-            // ⚠️ IDOR: 소유자 확인 없음
             long boardId = Long.parseLong(request.getParameter("boardId"));
             JsrBoard board = getBoardById(boardId);
-            String type = (board != null) ? board.getBoardType() : "INQUIRY";
+            if (board == null) {
+                response.sendRedirect(request.getContextPath() + "/board?error=notfound");
+                return;
+            }
+            if (!canManageBoard(board, user, isAdmin)) {
+                response.sendRedirect(request.getContextPath()
+                    + "/board?error=" + getBoardAccessError(board, isAdmin) + "&boardId=" + boardId);
+                return;
+            }
             deleteBoard(boardId);
-            response.sendRedirect(request.getContextPath() + "/board?tab=" + type + "&deleted=1");
+            response.sendRedirect(request.getContextPath()
+                + "/board?tab=" + board.getBoardType() + "&deleted=1");
 
         } else if (path.equals("/board/answer/delete")) {
             long answerId = Long.parseLong(request.getParameter("answerId"));
             long boardId  = Long.parseLong(request.getParameter("boardId"));
+            if (!isAdmin) {
+                response.sendRedirect(request.getContextPath()
+                    + "/board/detail?boardId=" + boardId + "&error=noperm");
+                return;
+            }
             deleteAnswer(answerId);
             response.sendRedirect(request.getContextPath() + "/board/detail?boardId=" + boardId);
 
         } else {
-            // 목록
             String tab  = request.getParameter("tab") != null ? request.getParameter("tab") : "NOTICE";
             int    page = 1;
             try { page = Integer.parseInt(request.getParameter("page")); } catch (Exception ignored) {}
@@ -141,8 +155,6 @@ public class BoardServlet extends HttpServlet {
         String path = request.getServletPath();
 
         if (path.equals("/board/write")) {
-            // ⚠️ Stored XSS: 이스케이프 없음
-            // ⚠️ CSRF: 토큰 없음
             String type    = request.getParameter("boardType");
             String title   = request.getParameter("title");
             String content = request.getParameter("content");
@@ -151,7 +163,6 @@ public class BoardServlet extends HttpServlet {
                 return;
             }
 
-            // 파일 업로드 처리
             String savedFileName = null;
             try {
                 Part filePart = request.getPart("attachFile");
@@ -168,8 +179,18 @@ public class BoardServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/board/detail?boardId=" + boardId);
 
         } else if (path.equals("/board/edit")) {
-            // ⚠️ IDOR: 소유자 확인 없음
-            long   boardId = Long.parseLong(request.getParameter("boardId"));
+            long boardId = Long.parseLong(request.getParameter("boardId"));
+            JsrBoard board = getBoardById(boardId);
+            if (board == null) {
+                response.sendRedirect(request.getContextPath() + "/board?error=notfound");
+                return;
+            }
+            if (!canManageBoard(board, user, isAdmin)) {
+                response.sendRedirect(request.getContextPath()
+                    + "/board?error=" + getBoardAccessError(board, isAdmin) + "&boardId=" + boardId);
+                return;
+            }
+
             String title   = request.getParameter("title");
             String content = request.getParameter("content");
 
@@ -187,16 +208,20 @@ public class BoardServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/board/detail?boardId=" + boardId);
 
         } else if (path.equals("/board/answer")) {
-            // ⚠️ 수직 권한 상승: hidden 필드 role 신뢰
-            long   boardId = Long.parseLong(request.getParameter("boardId"));
-            String content = request.getParameter("content");
-            String role    = request.getParameter("role");
+            long boardId = Long.parseLong(request.getParameter("boardId"));
+            JsrBoard board = getBoardById(boardId);
+            if (board == null) {
+                response.sendRedirect(request.getContextPath() + "/board?error=notfound");
+                return;
+            }
 
-            if (!"ADMIN".equals(role)) {
+            String content = request.getParameter("content");
+            if (!isAdmin || !"INQUIRY".equals(board.getBoardType())) {
                 response.sendRedirect(request.getContextPath()
                     + "/board/detail?boardId=" + boardId + "&error=noperm");
                 return;
             }
+
             JsrAnswer existing = getAnswer(boardId);
             if (existing != null) updateAnswer(existing.getAnswerId(), content);
             else                  insertAnswer(boardId, user.getUsername(), content);
@@ -205,43 +230,24 @@ public class BoardServlet extends HttpServlet {
         }
     }
 
-    /**
-     * ⚠️ 파일 업로드 취약점 핵심
-     *
-     * 검증 1: Content-Type이 image/* 인지 확인
-     *   → Burp Suite로 Content-Type을 image/jpeg로 변조하면 우회 가능
-     *
-     * 검증 2: 확장자를 .jpg/.png/.gif 로만 허용
-     *   → 파일명을 shell.jsp로 하되 Content-Type을 image/jpeg로 보내면 통과
-     *   → 실제로는 확장자 검증이 Content-Type 통과 후에만 실행됨
-     *
-     * 저장 경로: webapp/uploads/ (웹에서 직접 접근 가능)
-     *   → /uploads/shell.jsp 접근 시 Tomcat이 JSP로 실행
-     */
     private String handleFileUpload(Part filePart, HttpServletRequest request) throws IOException {
         String contentType = filePart.getContentType();
 
-        // 검증 1: Content-Type 체크 (⚠️ Burp로 변조 가능)
         boolean allowed = false;
         for (String ct : ALLOWED_CONTENT_TYPES) {
             if (ct.equals(contentType)) { allowed = true; break; }
         }
-        if (!allowed) return null; // 통과 못하면 저장 안 함
+        if (!allowed) return null;
 
-        // 원본 파일명 추출
         String originalName = extractFileName(filePart);
         if (originalName == null || originalName.isEmpty()) return null;
 
-        // 검증 2: 확장자 체크 (⚠️ Content-Type 변조로 이미 통과했다면 이 검증도 의미없음)
         String ext = "";
         int dotIdx = originalName.lastIndexOf(".");
         if (dotIdx >= 0) ext = originalName.substring(dotIdx).toLowerCase();
         if (!ext.matches("\\.(jpg|jpeg|png|gif)")) return null;
 
-        // 저장 파일명: 타임스탬프_원본명 (원본명 그대로 유지 → .jsp도 유지됨)
         String saveFileName = System.currentTimeMillis() + "_" + originalName;
-
-        // 저장 경로: /uploads/ (웹 루트에서 직접 접근 가능 → 웹쉘 실행 가능)
         String uploadDir = request.getServletContext().getRealPath("/uploads");
         File dir = new File(uploadDir);
         if (!dir.exists()) dir.mkdirs();
@@ -267,7 +273,18 @@ public class BoardServlet extends HttpServlet {
         return null;
     }
 
-    // ── DB 헬퍼 ────────────────────────────────────────────────
+    private boolean canManageBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
+        if (board == null) return false;
+        if ("NOTICE".equals(board.getBoardType())) return isAdmin;
+        return isAdmin || board.getUserId() == user.getUserId();
+    }
+
+    private String getBoardAccessError(JsrBoard board, boolean isAdmin) {
+        if (board != null && "NOTICE".equals(board.getBoardType()) && !isAdmin) {
+            return "noperm";
+        }
+        return "idor";
+    }
 
     private List<JsrBoard> getNoticeList() {
         List<JsrBoard> list = new ArrayList<>();
@@ -307,7 +324,7 @@ public class BoardServlet extends HttpServlet {
             int idx = 1;
             if (userId != null) ps.setLong(idx++, userId);
             ps.setInt(idx++, offset + 10);
-            ps.setInt(idx,   offset);
+            ps.setInt(idx, offset);
             rs = ps.executeQuery();
             while (rs.next()) list.add(mapBoardWithAnswerFlag(rs));
         } catch (SQLException e) { e.printStackTrace(); }
@@ -335,7 +352,6 @@ public class BoardServlet extends HttpServlet {
         Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
-            // ⚠️ IDOR: USER_ID 조건 없음
             ps = conn.prepareStatement("SELECT * FROM JSR_BOARD WHERE BOARD_ID=?");
             ps.setLong(1, boardId);
             rs = ps.executeQuery();
@@ -358,8 +374,8 @@ public class BoardServlet extends HttpServlet {
             ps.setLong(1, userId);
             ps.setString(2, username);
             ps.setString(3, type);
-            ps.setString(4, title);   // ⚠️ XSS
-            ps.setString(5, content); // ⚠️ XSS
+            ps.setString(4, title);
+            ps.setString(5, content);
             ps.setString(6, attachFile);
             ps.executeUpdate();
             rs = ps.getGeneratedKeys();
@@ -376,12 +392,16 @@ public class BoardServlet extends HttpServlet {
             if (attachFile != null) {
                 ps = conn.prepareStatement(
                     "UPDATE JSR_BOARD SET TITLE=?,CONTENT=?,ATTACH_FILE=? WHERE BOARD_ID=?");
-                ps.setString(1, title); ps.setString(2, content);
-                ps.setString(3, attachFile); ps.setLong(4, boardId);
+                ps.setString(1, title);
+                ps.setString(2, content);
+                ps.setString(3, attachFile);
+                ps.setLong(4, boardId);
             } else {
                 ps = conn.prepareStatement(
                     "UPDATE JSR_BOARD SET TITLE=?,CONTENT=? WHERE BOARD_ID=?");
-                ps.setString(1, title); ps.setString(2, content); ps.setLong(3, boardId);
+                ps.setString(1, title);
+                ps.setString(2, content);
+                ps.setLong(3, boardId);
             }
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
@@ -393,9 +413,12 @@ public class BoardServlet extends HttpServlet {
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement("DELETE FROM JSR_BOARD_ANSWER WHERE BOARD_ID=?");
-            ps.setLong(1, boardId); ps.executeUpdate(); DBUtil.close(ps);
+            ps.setLong(1, boardId);
+            ps.executeUpdate();
+            DBUtil.close(ps);
             ps = conn.prepareStatement("DELETE FROM JSR_BOARD WHERE BOARD_ID=?");
-            ps.setLong(1, boardId); ps.executeUpdate();
+            ps.setLong(1, boardId);
+            ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
         finally { DBUtil.close(ps, conn); }
     }
@@ -405,7 +428,8 @@ public class BoardServlet extends HttpServlet {
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement("SELECT * FROM JSR_BOARD_ANSWER WHERE BOARD_ID=?");
-            ps.setLong(1, boardId); rs = ps.executeQuery();
+            ps.setLong(1, boardId);
+            rs = ps.executeQuery();
             if (rs.next()) {
                 JsrAnswer a = new JsrAnswer();
                 a.setAnswerId(rs.getLong("ANSWER_ID"));
@@ -427,7 +451,9 @@ public class BoardServlet extends HttpServlet {
             ps = conn.prepareStatement(
                 "INSERT INTO JSR_BOARD_ANSWER (ANSWER_ID,BOARD_ID,ADMIN_NAME,CONTENT,CREATED_AT) " +
                 "VALUES (JSR_ANSWER_SEQ.NEXTVAL,?,?,?,SYSDATE)");
-            ps.setLong(1, boardId); ps.setString(2, adminName); ps.setString(3, content);
+            ps.setLong(1, boardId);
+            ps.setString(2, adminName);
+            ps.setString(3, content);
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
         finally { DBUtil.close(ps, conn); }
@@ -439,7 +465,8 @@ public class BoardServlet extends HttpServlet {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement(
                 "UPDATE JSR_BOARD_ANSWER SET CONTENT=?,CREATED_AT=SYSDATE WHERE ANSWER_ID=?");
-            ps.setString(1, content); ps.setLong(2, answerId);
+            ps.setString(1, content);
+            ps.setLong(2, answerId);
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
         finally { DBUtil.close(ps, conn); }
@@ -450,7 +477,8 @@ public class BoardServlet extends HttpServlet {
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement("DELETE FROM JSR_BOARD_ANSWER WHERE ANSWER_ID=?");
-            ps.setLong(1, answerId); ps.executeUpdate();
+            ps.setLong(1, answerId);
+            ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
         finally { DBUtil.close(ps, conn); }
     }
