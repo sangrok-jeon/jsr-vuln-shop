@@ -169,11 +169,32 @@ private boolean checkAdmin(HttpServletRequest request, HttpServletResponse respo
 
 ## 대응 후 증적자료
 
-`patched` 브랜치 기준으로 아래 항목을 순서대로 다시 캡처하면 대응 증적을 정리할 수 있다.
+### 1. 정상 요청에서 `role` 파라미터 제거 확인
 
-- `05-role-tampering-attempt-fixed.png`
-  - `role=ADMIN` 변조 요청 재시도 화면
-- `06-role-tampering-blocked-result.png`
-  - 마이페이지 권한이 `USER`로 유지되는 결과 화면
-- `07-admin-dashboard-access-blocked.png`
-  - 일반 사용자 세션으로 `/admin/dashboard` 접근이 차단되는 결과 화면
+- 대응 코드 적용 후 마이페이지 수정 요청에는 `email`, `address`, `phone`만 포함되고 `role`, `userId`가 더 이상 전송되지 않는다.
+
+![정상 요청에서 role 파라미터 제거 확인](images/03-privilege-escalation/05-mypage-update-request-without-role.png)
+
+### 2. `role=ADMIN` 강제 추가 재시도
+
+- Burp Suite에서 `role=ADMIN` 파라미터를 수동으로 추가해 다시 전송하였다.
+
+![role=ADMIN 강제 추가 재시도](images/03-privilege-escalation/06-role-admin-parameter-tampering-attempt.png)
+
+### 3. 권한 상승 차단 확인
+
+- 변조 요청 이후에도 마이페이지 역할 표시는 여전히 `user`로 유지되었다.
+
+![권한 상승 차단 후 user 유지](images/03-privilege-escalation/07-user-role-maintained-after-tampering.png)
+
+### 4. 관리자 대시보드 직접 접근 시도
+
+- 일반 사용자 세션으로 `/jsr/admin/dashboard`에 직접 접근을 시도하였다.
+
+![관리자 대시보드 직접 접근 시도](images/03-privilege-escalation/08-admin-dashboard-direct-access-attempt.png)
+
+### 5. 관리자 대시보드 접근 차단
+
+- 직접 접근 시 관리자 대시보드가 표시되지 않고 `/jsr/products`로 리다이렉트되는 것을 확인하였다.
+
+![관리자 대시보드 접근 차단 후 products 이동](images/03-privilege-escalation/09-admin-dashboard-access-blocked-products.png)
