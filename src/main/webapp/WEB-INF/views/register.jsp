@@ -73,7 +73,7 @@
 <body>
 <div class="reg-container">
     <div class="reg-logo">
-        <span class="logo-icon">🛒</span>
+        <span class="logo-icon">JSR</span>
         <div class="logo-name">JSR Shop</div>
         <div class="logo-sub">CTF 보안 취약점 실습 플랫폼</div>
     </div>
@@ -83,7 +83,7 @@
         <p class="subtitle">새 계정을 만드세요</p>
 
         <% if ("1".equals(request.getParameter("error"))) { %>
-        <div class="alert alert-error">❌ 이미 사용 중인 아이디입니다.</div>
+        <div class="alert alert-error">이미 사용 중인 아이디입니다.</div>
         <% } %>
 
         <form method="post" action="<%= request.getContextPath() %>/register">
@@ -91,7 +91,7 @@
                 <div>
                     <label class="field-label">아이디</label>
                     <div class="field-wrap">
-                        <span class="field-icon">👤</span>
+                        <span class="field-icon"></span>
                         <input type="text" name="userid" class="reg-input"
                                placeholder="아이디 입력" required autocomplete="username">
                     </div>
@@ -100,7 +100,7 @@
                     <label class="field-label">비밀번호 
 </label>
                     <div class="field-wrap">
-                        <span class="field-icon">🔒</span>
+                        <span class="field-icon">SEC</span>
                         <input type="password" name="password" class="reg-input"
                                placeholder="비밀번호 입력" required autocomplete="new-password">
                     </div>
@@ -108,7 +108,7 @@
                 <div>
                     <label class="field-label">이메일</label>
                     <div class="field-wrap">
-                        <span class="field-icon">📧</span>
+                        <span class="field-icon"></span>
                         <input type="email" name="email" class="reg-input"
                                placeholder="이메일 입력">
                     </div>
@@ -116,7 +116,7 @@
                 <div>
                     <label class="field-label">주소</label>
                     <div class="field-wrap">
-                        <span class="field-icon">📍</span>
+                        <span class="field-icon"></span>
                         <input type="text" name="address" class="reg-input"
                                placeholder="배송 주소 입력">
                     </div>
@@ -124,7 +124,7 @@
                 <div>
                     <label class="field-label">연락처</label>
                     <div class="field-wrap">
-                        <span class="field-icon">📱</span>
+                        <span class="field-icon"></span>
                         <input type="text" name="phone" class="reg-input"
                                placeholder="010-0000-0000">
                     </div>

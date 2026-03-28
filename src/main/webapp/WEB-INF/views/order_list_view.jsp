@@ -46,12 +46,12 @@
 <%@ include file="/WEB-INF/nav.jsp" %>
 <div class="list-wrap">
     <div class="list-header">
-        <h2>📋 주문 내역</h2>
+        <h2>주문 내역</h2>
     </div>
 <c:choose>
     <c:when test="${empty jsrOrders}">
         <div class="empty-state">
-            <div class="e-icon">🛒</div>
+            <div class="e-icon">ORD</div>
             <div class="e-text">아직 주문 내역이 없습니다.</div>
             <a href="<%= request.getContextPath() %>/products" class="jsr-btn">상품 보러 가기</a>
         </div>
@@ -80,9 +80,9 @@
                         <img src="<%= request.getContextPath() %>/static/images/${o.imageUrl}"
                              alt="${o.productName}" class="thumb"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span class="thumb-ph" style="display:none">📦</span>
+                        <span class="thumb-ph" style="display:none">IMG</span>
                     </c:when>
-                    <c:otherwise><span class="thumb-ph">📦</span></c:otherwise>
+                    <c:otherwise><span class="thumb-ph">IMG</span></c:otherwise>
                 </c:choose>
             </td>
             <td style="color:#64748b;font-family:monospace;font-weight:700">#${o.orderId}</td>

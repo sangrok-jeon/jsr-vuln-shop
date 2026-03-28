@@ -469,7 +469,7 @@
 <%-- ══ 히어로 배너 ══ --%>
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-badge">🔥 이번 주 특가</div>
+        <div class="hero-badge">이번 주 특가</div>
         <h1 class="hero-title">보안 · 전자기기<br><span>특별전 진행 중</span></h1>
         <p class="hero-desc">
             신규 회원 첫 구매 <strong style="color:#f1f5f9">10% 할인</strong> &nbsp;|&nbsp;
@@ -484,17 +484,17 @@
 
     <div class="hero-cards">
         <div class="hero-mini-card">
-            <div class="mc-icon">🔒</div>
+            <div class="mc-icon">SEC</div>
             <div class="mc-label">보안용품</div>
             <div class="mc-val">최대 40%↓</div>
         </div>
         <div class="hero-mini-card">
-            <div class="mc-icon">💾</div>
+            <div class="mc-icon">SSD</div>
             <div class="mc-label">저장장치</div>
             <div class="mc-val">특가 진행</div>
         </div>
         <div class="hero-mini-card">
-            <div class="mc-icon">📦</div>
+            <div class="mc-icon">IMG</div>
             <div class="mc-label">무료배송</div>
             <div class="mc-val">오늘 한정</div>
         </div>
@@ -508,16 +508,16 @@
         <a href="?category=보안용품" class="event-pill"><span class="pill-badge green">NEW</span> 신상 보안용품</a>
         <a href="?category=전자기기" class="event-pill"><span class="pill-badge blue">추천</span> 전자기기 특가</a>
         <a href="?category=저장장치" class="event-pill"><span class="pill-badge amber">SALE</span> 저장장치 할인</a>
-        <a href="?category=주변기기" class="event-pill">🖱️ 주변기기 모아보기</a>
-        <a href="#" class="event-pill">🎁 신규 회원 혜택</a>
-        <a href="#" class="event-pill">🚚 오늘 주문 당일 배송</a>
+        <a href="?category=주변기기" class="event-pill">ACC 주변기기 모아보기</a>
+        <a href="#" class="event-pill">신규 회원 혜택</a>
+        <a href="#" class="event-pill">오늘 주문 당일 배송</a>
     </div>
 </div>
 
 <%-- ══ 추천 상품 카드 ══ --%>
 <div class="shop-section">
     <div class="section-header">
-        <div class="section-title">🏆 <span>인기 상품</span> 추천</div>
+        <div class="section-title"><span>인기 상품</span> 추천</div>
         <a href="#product-list" class="section-more">전체보기 ›</a>
     </div>
 
@@ -531,15 +531,15 @@
                         <img src="<%= request.getContextPath() %>/static/images/${p.imageUrl}"
                              alt="${p.name}"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;font-size:40px">📦</span>
+                        <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;font-size:40px">IMG</span>
                     </c:when>
                     <c:otherwise>
                         <c:choose>
-                            <c:when test="${p.category == '전자기기'}">💻</c:when>
-                            <c:when test="${p.category == '주변기기'}">🖱️</c:when>
-                            <c:when test="${p.category == '저장장치'}">💾</c:when>
-                            <c:when test="${p.category == '보안용품'}">🔒</c:when>
-                            <c:otherwise>📦</c:otherwise>
+                            <c:when test="${p.category == '전자기기'}">PC</c:when>
+                            <c:when test="${p.category == '주변기기'}">ACC</c:when>
+                            <c:when test="${p.category == '저장장치'}">SSD</c:when>
+                            <c:when test="${p.category == '보안용품'}">SEC</c:when>
+                            <c:otherwise>IMG</c:otherwise>
                         </c:choose>
                     </c:otherwise>
                 </c:choose>
@@ -557,7 +557,7 @@
                 <div class="pcard-name">${p.name}</div>
                 <div class="pcard-price"><fmt:formatNumber value="${p.price}" pattern="#,###"/>원</div>
                 <div class="pcard-stock ${p.stock <= 10 ? 'low' : ''}">
-                    재고 ${p.stock}개${p.stock <= 10 ? ' ⚠️ 품절 임박' : ''}
+                    재고 ${p.stock}개${p.stock <= 10 ? ' 품절 임박' : ''}
                 </div>
             </div>
         </a>
@@ -567,7 +567,7 @@
         <c:if test="${empty jsrProducts}">
             <c:forEach begin="1" end="6">
             <div class="pcard">
-                <div class="pcard-img" style="color:#334155">📦</div>
+                <div class="pcard-img" style="color:#334155">IMG</div>
                 <div class="pcard-body">
                     <div class="pcard-cat">-</div>
                     <div class="pcard-name" style="color:#475569">상품 없음</div>
@@ -580,33 +580,33 @@
 
     <%-- ══ 카테고리 바로가기 ══ --%>
     <div class="section-header">
-        <div class="section-title">🗂️ 카테고리 <span>바로가기</span></div>
+        <div class="section-title">카테고리 <span>바로가기</span></div>
     </div>
 
     <div class="cat-grid">
         <a href="<%= request.getContextPath() %>/products?category=전자기기" class="cat-card">
-            <div class="cat-icon">💻</div>
+            <div class="cat-icon">PC</div>
             <div class="cat-info">
                 <div class="cat-name">전자기기</div>
                 <div class="cat-desc">노트북 · 태블릿 · 모니터</div>
             </div>
         </a>
         <a href="<%= request.getContextPath() %>/products?category=주변기기" class="cat-card">
-            <div class="cat-icon">🖱️</div>
+            <div class="cat-icon">ACC</div>
             <div class="cat-info">
                 <div class="cat-name">주변기기</div>
                 <div class="cat-desc">키보드 · 마우스 · 웹캠</div>
             </div>
         </a>
         <a href="<%= request.getContextPath() %>/products?category=저장장치" class="cat-card">
-            <div class="cat-icon">💾</div>
+            <div class="cat-icon">SSD</div>
             <div class="cat-info">
                 <div class="cat-name">저장장치</div>
                 <div class="cat-desc">SSD · HDD · USB</div>
             </div>
         </a>
         <a href="<%= request.getContextPath() %>/products?category=보안용품" class="cat-card">
-            <div class="cat-icon">🔒</div>
+            <div class="cat-icon">SEC</div>
             <div class="cat-info">
                 <div class="cat-name">보안용품</div>
                 <div class="cat-desc">프라이버시 · 잠금장치</div>
@@ -622,7 +622,7 @@
 <div class="product-list-section" id="product-list">
 
     <div class="section-header">
-        <div class="section-title">📋 전체 <span>상품 목록</span></div>
+        <div class="section-title">전체 <span>상품 목록</span></div>
     </div>
 
     <%-- 검색 --%>
@@ -640,13 +640,13 @@
         <a href="<%= request.getContextPath() %>/products"
            class="${empty param.category ? 'active' : ''}">전체</a>
         <a href="?category=전자기기"
-           class="${param.category == '전자기기' ? 'active' : ''}">💻 전자기기</a>
+           class="${param.category == '전자기기' ? 'active' : ''}">PC 전자기기</a>
         <a href="?category=주변기기"
-           class="${param.category == '주변기기' ? 'active' : ''}">🖱️ 주변기기</a>
+           class="${param.category == '주변기기' ? 'active' : ''}">ACC 주변기기</a>
         <a href="?category=저장장치"
-           class="${param.category == '저장장치' ? 'active' : ''}">💾 저장장치</a>
+           class="${param.category == '저장장치' ? 'active' : ''}">SSD 저장장치</a>
         <a href="?category=보안용품"
-           class="${param.category == '보안용품' ? 'active' : ''}">🔒 보안용품</a>
+           class="${param.category == '보안용품' ? 'active' : ''}">SEC 보안용품</a>
     </div>
 <c:if test="${not empty keyword}">
     <p class="search-result-info">
@@ -678,16 +678,16 @@
                              alt="${p.name}"
                              style="width:52px;height:52px;object-fit:cover;border-radius:8px;border:1px solid #334155;display:block"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span style="display:none;width:52px;height:52px;border-radius:8px;background:#263248;border:1px solid #334155;align-items:center;justify-content:center;font-size:22px">📦</span>
+                        <span style="display:none;width:52px;height:52px;border-radius:8px;background:#263248;border:1px solid #334155;align-items:center;justify-content:center;font-size:22px">IMG</span>
                     </c:when>
                     <c:otherwise>
                         <span style="display:flex;width:52px;height:52px;border-radius:8px;background:#263248;border:1px solid #334155;align-items:center;justify-content:center;font-size:22px">
                             <c:choose>
-                                <c:when test="${p.category == '전자기기'}">💻</c:when>
-                                <c:when test="${p.category == '주변기기'}">🖱️</c:when>
-                                <c:when test="${p.category == '저장장치'}">💾</c:when>
-                                <c:when test="${p.category == '보안용품'}">🔒</c:when>
-                                <c:otherwise>📦</c:otherwise>
+                                <c:when test="${p.category == '전자기기'}">PC</c:when>
+                                <c:when test="${p.category == '주변기기'}">ACC</c:when>
+                                <c:when test="${p.category == '저장장치'}">SSD</c:when>
+                                <c:when test="${p.category == '보안용품'}">SEC</c:when>
+                                <c:otherwise>IMG</c:otherwise>
                             </c:choose>
                         </span>
                     </c:otherwise>

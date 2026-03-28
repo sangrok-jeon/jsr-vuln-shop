@@ -40,9 +40,9 @@
     <div class="write-header">
         <h2>
             <c:choose>
-                <c:when test="${jsrBoard != null}">✏️ 수정</c:when>
-                <c:when test="${writeType == 'NOTICE'}">📢 공지 작성</c:when>
-                <c:otherwise>✍️ 문의하기</c:otherwise>
+                <c:when test="${jsrBoard != null}">수정</c:when>
+                <c:when test="${writeType == 'NOTICE'}">공지 작성</c:when>
+                <c:otherwise>문의하기</c:otherwise>
             </c:choose>
         </h2>
         <span class="type-badge ${writeType == 'NOTICE' ? 'type-notice' : 'type-inquiry'}">

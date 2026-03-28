@@ -30,7 +30,7 @@
 <%@ include file="/WEB-INF/nav.jsp" %>
 
 <div class="jsr-wrap">
-    <h2>🛒 장바구니</h2>
+    <h2>장바구니</h2>
 
     <c:choose>
     <c:when test="${empty jsrCartItems}">
@@ -61,10 +61,10 @@
                             <img src="<%= request.getContextPath() %>/static/images/${item.imageUrl}"
                                  alt="${item.productName}" class="thumb"
                                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                            <span class="thumb-placeholder" style="display:none">📦</span>
+                            <span class="thumb-placeholder" style="display:none">IMG</span>
                         </c:when>
                         <c:otherwise>
-                            <span class="thumb-placeholder">📦</span>
+                            <span class="thumb-placeholder">IMG</span>
                         </c:otherwise>
                     </c:choose>
                 </td>

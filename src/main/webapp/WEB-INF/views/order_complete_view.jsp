@@ -132,7 +132,7 @@
 <%@ include file="/WEB-INF/nav.jsp" %>
 
 <div class="complete-wrap">
-    <span class="success-icon">🎉</span>
+    <span class="success-icon">OK</span>
     <div class="complete-title">결제 완료!</div>
     <div class="complete-sub">주문이 성공적으로 접수되었습니다.</div>
 
@@ -144,7 +144,7 @@
 </c:if>
 
     <div class="summary-card">
-        <div class="summary-header">📦 주문 #${jsrOrder.orderId} 상세</div>
+        <div class="summary-header">주문 #${jsrOrder.orderId} 상세</div>
 
         <%-- 상품 이미지 + 이름 --%>
         <div class="summary-product">
@@ -153,9 +153,9 @@
                     <c:when test="${not empty jsrOrder.imageUrl}">
                         <img src="<%= request.getContextPath() %>/static/images/${jsrOrder.imageUrl}"
                              alt="${jsrOrder.productName}"
-                             onerror="this.style.display='none';this.parentNode.innerHTML='📦'">
+                             onerror="this.style.display='none';this.parentNode.innerHTML='IMG'">
                     </c:when>
-                    <c:otherwise>📦</c:otherwise>
+                    <c:otherwise>IMG</c:otherwise>
                 </c:choose>
             </div>
             <div>

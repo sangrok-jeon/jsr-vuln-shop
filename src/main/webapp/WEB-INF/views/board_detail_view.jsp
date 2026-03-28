@@ -51,9 +51,9 @@
 <body>
 <%@ include file="/WEB-INF/nav.jsp" %>
 <div class="detail-wrap">
-<c:if test="${param.answered == '1'}"><div class="alert alert-success">✅ 답변이 등록되었습니다.</div></c:if>
+<c:if test="${param.answered == '1'}"><div class="alert alert-success">답변이 등록되었습니다.</div></c:if>
     <c:if test="${param.error == 'noperm'}">
-        <div class="alert alert-error">❌ 관리자만 답변할 수 있습니다.</div>
+        <div class="alert alert-error">관리자만 답변할 수 있습니다.</div>
 </c:if>
 
     <c:if test="${jsrBoard != null}">
@@ -69,15 +69,15 @@
             </div>
             <div class="post-meta">
                 <span style="font-family:monospace;color:#475569">#${jsrBoard.boardId}</span>
-                <span class="author">👤 ${jsrBoard.username}</span>
-<span>🕐 ${jsrBoard.createdAt}</span>
+                <span class="author">${jsrBoard.username}</span>
+<span>${jsrBoard.createdAt}</span>
             </div>
         </div>
 <div class="post-body">${jsrBoard.content}</div>
-        <%-- 첨부파일 (⚠️ 웹 루트 /uploads/ 에 저장 → URL 직접 접근으로 웹쉘 실행 가능) --%>
+        <%-- 첨부파일 (웹 루트 /uploads/ 에 저장 → URL 직접 접근으로 웹쉘 실행 가능) --%>
         <c:if test="${not empty jsrBoard.attachFile}">
         <div class="attach-box">
-            <span style="color:#475569">📎 첨부:</span>
+            <span style="color:#475569">첨부:</span>
             <a class="attach-link"
                href="<%= request.getContextPath() %>/uploads/${jsrBoard.attachFile}"
                target="_blank">${jsrBoard.attachFile}</a>
@@ -114,8 +114,8 @@
             <div class="answer-header">
                 <div class="answer-header-left">
                     <span class="answer-badge">관리자 답변</span>
-                    <span class="answer-admin">👤 ${jsrBoard.answer.adminName}</span>
-                    <span class="answer-date">🕐 ${jsrBoard.answer.createdAt}</span>
+                    <span class="answer-admin">${jsrBoard.answer.adminName}</span>
+                    <span class="answer-date">${jsrBoard.answer.createdAt}</span>
                 </div>
                 <c:if test="${_isAdmin}">
                     <a href="<%= request.getContextPath() %>/board/answer/delete?answerId=${jsrBoard.answer.answerId}&boardId=${jsrBoard.boardId}"
@@ -130,7 +130,7 @@
         <%-- 관리자 답변 수정 폼 --%>
         <c:if test="${_isAdmin}">
         <div class="answer-form-card">
-            <h3>✏️ 답변 수정</h3>
+            <h3>답변 수정</h3>
             <form method="post" action="<%= request.getContextPath() %>/board/answer">
                 <input type="hidden" name="boardId" value="${jsrBoard.boardId}">
 <input type="hidden" name="role" value="${_navRole}">
@@ -142,13 +142,13 @@
     </c:when>
     <c:otherwise>
         <div class="answer-pending">
-            <div style="font-size:32px;margin-bottom:8px">⏳</div>
+            <div style="font-size:32px;margin-bottom:8px">대기</div>
             <div style="font-size:13px">아직 답변이 없습니다. 빠른 시일 내에 답변드리겠습니다.</div>
         </div>
 
         <%-- 답변 작성 폼 — 모든 유저에게 렌더링 (소스 보기로 hidden 필드 발견 가능) --%>
         <div class="answer-form-card">
-            <h3>💬 답변 작성</h3>
+            <h3>답변 작성</h3>
 <form method="post" action="<%= request.getContextPath() %>/board/answer">
                 <input type="hidden" name="boardId" value="${jsrBoard.boardId}">
 <input type="hidden" name="role" value="${_navRole}">

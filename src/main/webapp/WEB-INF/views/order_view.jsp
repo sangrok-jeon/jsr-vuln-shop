@@ -78,7 +78,7 @@
 <body>
 <%@ include file="/WEB-INF/nav.jsp" %>
 <div class="order-wrap">
-    <div class="order-header"><h2>💳 주문 / 결제</h2></div>
+    <div class="order-header"><h2>주문 / 결제</h2></div>
 <%-- 단일 상품 --%>
     <c:if test="${jsrProduct != null}">
     <div class="order-product-card">
@@ -87,15 +87,15 @@
                 <c:when test="${not empty jsrProduct.imageUrl}">
                     <img src="<%= request.getContextPath() %>/static/images/${jsrProduct.imageUrl}"
                          alt="${jsrProduct.name}"
-                         onerror="this.style.display='none';this.parentNode.innerHTML='📦'">
+                         onerror="this.style.display='none';this.parentNode.innerHTML='IMG'">
                 </c:when>
                 <c:otherwise>
                     <c:choose>
-                        <c:when test="${jsrProduct.category=='전자기기'}">💻</c:when>
-                        <c:when test="${jsrProduct.category=='주변기기'}">🖱️</c:when>
-                        <c:when test="${jsrProduct.category=='저장장치'}">💾</c:when>
-                        <c:when test="${jsrProduct.category=='보안용품'}">🔒</c:when>
-                        <c:otherwise>📦</c:otherwise>
+                        <c:when test="${jsrProduct.category=='전자기기'}">PC</c:when>
+                        <c:when test="${jsrProduct.category=='주변기기'}">ACC</c:when>
+                        <c:when test="${jsrProduct.category=='저장장치'}">SSD</c:when>
+                        <c:when test="${jsrProduct.category=='보안용품'}">SEC</c:when>
+                        <c:otherwise>IMG</c:otherwise>
                     </c:choose>
                 </c:otherwise>
             </c:choose>
@@ -117,9 +117,9 @@
                 <c:when test="${not empty item.imageUrl}">
                     <img src="<%= request.getContextPath() %>/static/images/${item.imageUrl}"
                          alt="${item.productName}"
-                         onerror="this.style.display='none';this.parentNode.innerHTML='📦'">
+                         onerror="this.style.display='none';this.parentNode.innerHTML='IMG'">
                 </c:when>
-                <c:otherwise>📦</c:otherwise>
+                <c:otherwise>IMG</c:otherwise>
             </c:choose>
         </div>
         <div>
@@ -133,7 +133,7 @@
 
     <%-- 포인트 현황 --%>
     <div class="point-status">
-        <div class="ps-title">💰 포인트 결제 현황</div>
+        <div class="ps-title">포인트 결제 현황</div>
         <div class="ps-row">
             <span class="lbl">보유 포인트</span>
             <span class="val v-have"><fmt:formatNumber value="${jsrCurrentPoint}" pattern="#,###"/>P</span>
@@ -158,7 +158,7 @@
     <%-- 포인트 부족 에러 --%>
     <c:if test="${not empty errorMsg}">
     <div class="error-box">
-        <div class="e-title">❌ ${errorMsg}</div>
+        <div class="e-title">${errorMsg}</div>
         <div class="e-desc">
             보유 포인트: <strong style="color:#38bdf8"><fmt:formatNumber value="${jsrCurrentPoint}" pattern="#,###"/>P</strong>
             / 필요: <strong style="color:#f1f5f9"><fmt:formatNumber value="${jsrOrderTotal}" pattern="#,###"/>P</strong><br>
@@ -170,7 +170,7 @@
 
     <%-- 결제 폼 --%>
     <div class="pay-form-box">
-        <h3>📦 배송 정보</h3>
+        <h3>배송 정보</h3>
         <c:choose>
         <c:when test="${jsrCurrentPoint >= jsrOrderTotal}">
             <form method="post" action="<%= request.getContextPath() %>/order/proc">
@@ -192,7 +192,7 @@
                 </c:if>
                 <input type="text" name="address" class="addr-input"
                        value="${jsrUser.address}" placeholder="배송 주소를 입력하세요"><br>
-                <input type="submit" value="💳 포인트로 결제 완료" class="jsr-btn jsr-btn-danger">
+                <input type="submit" value="포인트로 결제 완료" class="jsr-btn jsr-btn-danger">
             </form>
         </c:when>
         <c:otherwise>

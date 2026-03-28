@@ -175,7 +175,7 @@
 <%-- ══ 이미지 업로드 모달 ══ --%>
 <div class="modal-overlay" id="uploadModal">
     <div class="modal-box">
-        <h3 id="modalTitle">🖼️ 이미지 업로드</h3>
+        <h3 id="modalTitle">이미지 업로드</h3>
         <form method="post"
               action="<%= request.getContextPath() %>/admin/product_image_upload"
               enctype="multipart/form-data" id="uploadForm">
@@ -187,7 +187,7 @@
                 <input type="file" name="imageFile" id="imageFileInput"
                        accept="image/jpeg,image/png,image/gif,image/webp"
                        onchange="previewImage(this)">
-                <div class="uz-icon" id="uzIcon">📁</div>
+                <div class="uz-icon" id="uzIcon">FILE</div>
                 <div class="uz-text">
                     클릭하거나 이미지를 드래그하세요<br>
                     <strong>JPG · PNG · GIF · WEBP</strong> / 최대 10MB
@@ -205,28 +205,28 @@
 
 <div class="admin-wrap">
     <div class="admin-header">
-        <h2>📦 상품 관리</h2>
+        <h2>상품 관리</h2>
         <a href="<%= request.getContextPath() %>/admin/dashboard" class="back-link">← 대시보드</a>
     </div>
 
     <%-- 알림 --%>
     <c:if test="${param.uploaded == '1'}">
-        <div class="alert-box alert-success">✅ 이미지가 업로드되었습니다.</div>
+        <div class="alert-box alert-success">이미지가 업로드되었습니다.</div>
     </c:if>
     <c:if test="${param.added == '1'}">
-        <div class="alert-box alert-success">✅ 상품이 추가되었습니다.</div>
+        <div class="alert-box alert-success">상품이 추가되었습니다.</div>
     </c:if>
     <c:if test="${param.updated == '1'}">
-        <div class="alert-box alert-success">✅ 상품이 수정되었습니다.</div>
+        <div class="alert-box alert-success">상품이 수정되었습니다.</div>
     </c:if>
     <c:if test="${param.deleted == '1'}">
-        <div class="alert-box alert-success">✅ 상품이 삭제되었습니다.</div>
+        <div class="alert-box alert-success">상품이 삭제되었습니다.</div>
     </c:if>
     <c:if test="${param.error == 'nofile'}">
-        <div class="alert-box alert-error">❌ 파일을 선택해주세요.</div>
+        <div class="alert-box alert-error">파일을 선택해주세요.</div>
     </c:if>
     <c:if test="${param.error == 'invalidtype'}">
-        <div class="alert-box alert-error">❌ JPG, PNG, GIF, WEBP 형식만 가능합니다.</div>
+        <div class="alert-box alert-error">JPG, PNG, GIF, WEBP 형식만 가능합니다.</div>
     </c:if>
 
     <%-- ── 상품 추가 폼 ── --%>
@@ -295,16 +295,16 @@
                         <img src="<%= request.getContextPath() %>/static/images/${p.imageUrl}"
                              alt="${p.name}" class="prod-thumb"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span class="prod-thumb-ph" style="display:none">📦</span>
+                        <span class="prod-thumb-ph" style="display:none">IMG</span>
                     </c:when>
                     <c:otherwise>
                         <span class="prod-thumb-ph">
                             <c:choose>
-                                <c:when test="${p.category=='전자기기'}">💻</c:when>
-                                <c:when test="${p.category=='주변기기'}">🖱️</c:when>
-                                <c:when test="${p.category=='저장장치'}">💾</c:when>
-                                <c:when test="${p.category=='보안용품'}">🔒</c:when>
-                                <c:otherwise>📦</c:otherwise>
+                                <c:when test="${p.category=='전자기기'}">PC</c:when>
+                                <c:when test="${p.category=='주변기기'}">ACC</c:when>
+                                <c:when test="${p.category=='저장장치'}">SSD</c:when>
+                                <c:when test="${p.category=='보안용품'}">SEC</c:when>
+                                <c:otherwise>IMG</c:otherwise>
                             </c:choose>
                         </span>
                     </c:otherwise>
@@ -347,7 +347,7 @@
             <td>
                 <button type="button" class="jsr-btn-sm"
                         onclick="openModal(${p.productId}, '${p.name}')">
-                    🖼️ 업로드
+                    업로드
                 </button>
             </td>
 
@@ -371,12 +371,12 @@
 <script>
 function openModal(productId, productName) {
     document.getElementById('modalProductId').value = productId;
-    document.getElementById('modalTitle').textContent = '🖼️ 이미지 업로드 — ' + productName;
+    document.getElementById('modalTitle').textContent = '이미지 업로드 — ' + productName;
     document.getElementById('uploadPreview').style.display = 'none';
     document.getElementById('uploadPreview').src = '';
     document.getElementById('imageFileInput').value = '';
     document.getElementById('uploadBtn').disabled = true;
-    document.getElementById('uzIcon').textContent = '📁';
+    document.getElementById('uzIcon').textContent = 'FILE';
     document.getElementById('uploadModal').classList.add('open');
 }
 function closeModal() {
@@ -389,7 +389,7 @@ function previewImage(input) {
         const preview = document.getElementById('uploadPreview');
         preview.src = e.target.result;
         preview.style.display = 'block';
-        document.getElementById('uzIcon').textContent = '✅';
+        document.getElementById('uzIcon').textContent = 'OK';
         document.getElementById('uploadBtn').disabled = false;
     };
     reader.readAsDataURL(input.files[0]);
