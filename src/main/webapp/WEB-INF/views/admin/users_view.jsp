@@ -81,7 +81,7 @@
 
 <div class="admin-wrap">
     <div class="admin-header">
-        <h2>👥 회원 관리</h2>
+        <h2>회원 관리</h2>
         <a href="<%= request.getContextPath() %>/admin/dashboard" class="back-link">← 대시보드</a>
     </div>
 <div class="section-title">회원 목록 (${jsrUsers.size()}명)</div>

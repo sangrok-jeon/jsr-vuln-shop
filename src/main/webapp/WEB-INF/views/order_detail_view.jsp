@@ -59,7 +59,7 @@
 <body>
 <%@ include file="/WEB-INF/nav.jsp" %>
 <div class="detail-wrap">
-    <div class="detail-header"><h2>🧾 주문 상세</h2></div>
+    <div class="detail-header"><h2>주문 상세</h2></div>
 <c:choose>
     <c:when test="${jsrOrder != null}">
 
@@ -70,9 +70,9 @@
                     <c:when test="${not empty jsrOrder.imageUrl}">
                         <img src="<%= request.getContextPath() %>/static/images/${jsrOrder.imageUrl}"
                              alt="${jsrOrder.productName}"
-                             onerror="this.style.display='none';this.parentNode.innerHTML='📦'">
+                             onerror="this.style.display='none';this.parentNode.innerHTML='IMG'">
                     </c:when>
-                    <c:otherwise>📦</c:otherwise>
+                    <c:otherwise>IMG</c:otherwise>
                 </c:choose>
             </div>
             <div>

@@ -146,28 +146,28 @@
 
 <div class="admin-wrap">
     <div class="admin-header">
-        <h2>🛠️ 관리자 대시보드</h2>
+        <h2>관리자 대시보드</h2>
         <span class="admin-badge">ADMIN PANEL</span>
     </div>
 <%-- 통계 카드 --%>
     <div class="stat-grid">
         <div class="stat-card blue">
-            <div class="stat-icon">👥</div>
+            <div class="stat-icon">USERS</div>
             <div class="stat-label">전체 회원</div>
             <div class="stat-value">${jsrTotalUsers}<span class="stat-unit">명</span></div>
         </div>
         <div class="stat-card green">
-            <div class="stat-icon">📦</div>
+            <div class="stat-icon">IMG</div>
             <div class="stat-label">전체 상품</div>
             <div class="stat-value">${jsrTotalProducts}<span class="stat-unit">개</span></div>
         </div>
         <div class="stat-card amber">
-            <div class="stat-icon">🛒</div>
+            <div class="stat-icon">ORD</div>
             <div class="stat-label">전체 주문</div>
             <div class="stat-value">${jsrTotalOrders}<span class="stat-unit">건</span></div>
         </div>
         <div class="stat-card purple">
-            <div class="stat-icon">💰</div>
+            <div class="stat-icon">SALES</div>
             <div class="stat-label">총 매출</div>
             <div class="stat-value" style="font-size:1.3rem">
                 <fmt:formatNumber value="${jsrTotalRevenue}" pattern="#,###"/>
@@ -179,21 +179,21 @@
     <%-- 메뉴 --%>
     <div class="menu-grid">
         <a href="<%= request.getContextPath() %>/admin/users" class="menu-card">
-            <div class="menu-card-icon">👥</div>
+            <div class="menu-card-icon">USERS</div>
             <div class="menu-card-text">
                 <div class="mc-title">회원 관리</div>
                 <div class="mc-desc">회원 목록 · 포인트 수정 · 삭제</div>
             </div>
         </a>
         <a href="<%= request.getContextPath() %>/admin/products" class="menu-card">
-            <div class="menu-card-icon">📦</div>
+            <div class="menu-card-icon">IMG</div>
             <div class="menu-card-text">
                 <div class="mc-title">상품 관리</div>
                 <div class="mc-desc">상품 추가 · 수정 · 삭제</div>
             </div>
         </a>
         <a href="<%= request.getContextPath() %>/admin/orders" class="menu-card">
-            <div class="menu-card-icon">🛒</div>
+            <div class="menu-card-icon">ORD</div>
             <div class="menu-card-text">
                 <div class="mc-title">주문 관리</div>
                 <div class="mc-desc">주문 목록 · 상태 변경</div>

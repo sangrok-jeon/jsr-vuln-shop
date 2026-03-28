@@ -25,7 +25,7 @@
         margin-bottom: 8px; position: relative; overflow: hidden;
     }
     .point-banner::after {
-        content:'💰'; position:absolute; right:20px; top:50%;
+        content:''; position:absolute; right:20px; top:50%;
         transform:translateY(-50%); font-size:60px; opacity:0.07; pointer-events:none;
     }
     .pb-label { font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
@@ -88,30 +88,30 @@
 <body>
 <%@ include file="/WEB-INF/nav.jsp" %>
 <div class="point-wrap">
-    <div class="point-header"><h2>💰 포인트</h2></div>
+    <div class="point-header"><h2>포인트</h2></div>
 
     <%-- ── 알림 메시지 ── --%>
     <c:if test="${param.charged == '1'}">
-        <div class="alert alert-success">✅ 포인트가 충전되었습니다.</div>
+        <div class="alert alert-success">포인트가 충전되었습니다.</div>
     </c:if>
     <c:if test="${param.used == '1'}">
-        <div class="alert alert-success">✅ 포인트가 사용되었습니다.</div>
+        <div class="alert alert-success">포인트가 사용되었습니다.</div>
     </c:if>
     <c:if test="${param.error == 'empty' || param.error == 'invalid'}">
-        <div class="alert alert-error">❌ 올바른 금액을 입력해주세요.</div>
+        <div class="alert alert-error">올바른 금액을 입력해주세요.</div>
     </c:if>
     <c:if test="${param.error == 'negative'}">
-        <div class="alert alert-error">❌ 0보다 큰 금액을 입력해주세요.</div>
+        <div class="alert alert-error">0보다 큰 금액을 입력해주세요.</div>
     </c:if>
     <c:if test="${param.error == 'overlimit'}">
         <div class="alert alert-error">
-            ❌ 1회 최대 충전 한도 초과 —
+            1회 최대 충전 한도 초과 —
             최대 <strong><fmt:formatNumber value="${param.limit}" pattern="#,###"/>P</strong>까지 충전 가능합니다.
         </div>
     </c:if>
     <c:if test="${param.error == 'maxpoint'}">
         <div class="alert alert-error">
-            ❌ 최대 보유 포인트 초과 —
+            최대 보유 포인트 초과 —
             현재 <strong><fmt:formatNumber value="${param.current}" pattern="#,###"/>P</strong> 보유 중,
             최대 <strong><fmt:formatNumber value="${param.max}" pattern="#,###"/>P</strong>까지 보유 가능합니다.
         </div>
@@ -189,7 +189,7 @@
     </div>
 
     <%-- ── 포인트 이력 ── --%>
-    <div class="section-title">📊 포인트 이력</div>
+    <div class="section-title">포인트 이력</div>
     <table class="jsr-table">
         <thead>
         <tr>

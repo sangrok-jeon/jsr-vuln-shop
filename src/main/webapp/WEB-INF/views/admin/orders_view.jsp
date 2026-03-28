@@ -76,7 +76,7 @@
 
 <div class="admin-wrap">
     <div class="admin-header">
-        <h2>🛒 주문 관리</h2>
+        <h2>주문 관리</h2>
         <a href="<%= request.getContextPath() %>/admin/dashboard" class="back-link">← 대시보드</a>
     </div>
 

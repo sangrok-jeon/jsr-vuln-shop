@@ -127,15 +127,15 @@
 
     <%-- 알림 --%>
     <% if ("1".equals(request.getParameter("updated"))) { %>
-    <div class="alert alert-success">✅ 정보가 수정되었습니다.</div>
+    <div class="alert alert-success">정보가 수정되었습니다.</div>
     <% } %>
     <% if ("1".equals(request.getParameter("pwChanged"))) { %>
-    <div class="alert alert-success">✅ 비밀번호가 변경되었습니다.</div>
+    <div class="alert alert-success">비밀번호가 변경되었습니다.</div>
     <% } %>
 <%-- 포인트 카드 --%>
     <div class="point-card">
         <div>
-            <div class="pc-label">💰 보유 포인트</div>
+            <div class="pc-label">보유 포인트</div>
             <div class="pc-value">
                 <fmt:formatNumber value="${jsrUser.point}" pattern="#,###"/>
                 <span class="pc-unit">P</span>
@@ -148,7 +148,7 @@
     <div class="mypage-grid">
         <%-- 기본 정보 수정 --%>
         <div class="form-card">
-            <h3>✏️ 기본 정보 수정</h3>
+            <h3>기본 정보 수정</h3>
 <form method="post" action="<%= request.getContextPath() %>/mypage/update">
                 <div class="form-field">
                     <label>이메일</label>
@@ -168,7 +168,7 @@
 
         <%-- 비밀번호 변경 --%>
         <div class="form-card">
-            <h3>🔒 비밀번호 변경</h3>
+            <h3>비밀번호 변경</h3>
 <form method="post" action="<%= request.getContextPath() %>/mypage/pw_change">
                 <div class="form-field">
                     <label>새 비밀번호 
@@ -187,7 +187,7 @@
     </div>
 
     <%-- 최근 주문 --%>
-    <div class="section-title">📋 최근 주문</div>
+    <div class="section-title">최근 주문</div>
     <table class="jsr-table">
         <thead>
         <tr>
@@ -210,9 +210,9 @@
                         <img src="<%= request.getContextPath() %>/static/images/${o.imageUrl}"
                              alt="${o.productName}" class="order-thumb"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span class="order-thumb-ph" style="display:none">📦</span>
+                        <span class="order-thumb-ph" style="display:none">IMG</span>
                     </c:when>
-                    <c:otherwise><span class="order-thumb-ph">📦</span></c:otherwise>
+                    <c:otherwise><span class="order-thumb-ph">IMG</span></c:otherwise>
                 </c:choose>
             </td>
             <td style="color:#64748b;font-family:monospace">#${o.orderId}</td>

@@ -157,7 +157,7 @@
 <body>
 <div class="login-container">
     <div class="login-logo">
-        <span class="logo-icon">🛒</span>
+        <span class="logo-icon">JSR</span>
         <div class="logo-name">JSR Shop</div>
         <div class="logo-sub">보안 취약점 실습 플랫폼</div>
     </div>
@@ -167,10 +167,10 @@
         <p class="subtitle">계정에 로그인하세요</p>
 
         <% if ("1".equals(request.getParameter("error"))) { %>
-        <div class="alert alert-error">❌ 아이디 또는 비밀번호가 틀렸습니다.</div>
+        <div class="alert alert-error">아이디 또는 비밀번호가 틀렸습니다.</div>
         <% } %>
         <% if ("1".equals(request.getParameter("registered"))) { %>
-        <div class="alert alert-success">✅ 회원가입 완료! 로그인하세요.</div>
+        <div class="alert alert-success">회원가입 완료! 로그인하세요.</div>
         <% } %>
 
         <form method="post" action="<%= request.getContextPath() %>/login">
@@ -178,7 +178,7 @@
                 <div>
                     <label class="field-label">아이디</label>
                     <div class="field-wrap">
-                        <span class="field-icon">👤</span>
+                        <span class="field-icon"></span>
                         <input type="text" name="userid" class="login-input"
                                placeholder="아이디를 입력하세요" autocomplete="username">
                     </div>
@@ -186,7 +186,7 @@
                 <div>
                     <label class="field-label">비밀번호</label>
                     <div class="field-wrap">
-                        <span class="field-icon">🔒</span>
+                        <span class="field-icon">SEC</span>
                         <input type="password" name="password" class="login-input"
                                placeholder="비밀번호를 입력하세요" autocomplete="current-password">
                     </div>

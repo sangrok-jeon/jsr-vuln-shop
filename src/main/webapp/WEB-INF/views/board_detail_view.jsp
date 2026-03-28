@@ -128,7 +128,7 @@
                 </c:when>
                 <c:otherwise>
                     <div class="answer-pending">
-                        <div style="font-size:32px;margin-bottom:8px">⏳</div>
+                        <div style="font-size:32px;margin-bottom:8px">대기</div>
                         <div style="font-size:13px">아직 답변이 없습니다. 빠른 시일 내에 답변드리겠습니다.</div>
                     </div>
 

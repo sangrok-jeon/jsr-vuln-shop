@@ -61,8 +61,8 @@
 <%@ include file="/WEB-INF/nav.jsp" %>
 <div class="board-wrap">
 
-    <c:if test="${param.deleted == '1'}"><div class="alert alert-success">✅ 삭제되었습니다.</div></c:if>
-    <c:if test="${param.error == 'noperm'}"><div class="alert alert-error">❌ 권한이 없습니다.</div></c:if>
+    <c:if test="${param.deleted == '1'}"><div class="alert alert-success">삭제되었습니다.</div></c:if>
+    <c:if test="${param.error == 'noperm'}"><div class="alert alert-error">권한이 없습니다.</div></c:if>
     <c:if test="${param.error == 'idor'}">
 는 타인의 문의입니다.
             먼저 관리자 권한을 획득한 후 재시도해보세요!
@@ -71,11 +71,11 @@
 <div class="tab-bar">
         <button class="tab-btn ${jsrTab == 'NOTICE' ? 'active' : ''}"
                 onclick="location.href='<%= request.getContextPath() %>/board?tab=NOTICE'">
-            📢 공지사항
+            공지사항
         </button>
         <button class="tab-btn ${jsrTab == 'INQUIRY' ? 'active' : ''}"
                 onclick="location.href='<%= request.getContextPath() %>/board?tab=INQUIRY'">
-            💬 1:1 문의
+            1:1 문의
             <c:if test="${jsrIsAdmin}"><span style="font-size:10px;color:#ef4444;margin-left:3px">(전체)</span></c:if>
         </button>
     </div>
@@ -90,7 +90,7 @@
         </div>
         <c:choose>
         <c:when test="${empty jsrNotices}">
-            <div class="empty-state"><div class="empty-icon">📭</div><div>등록된 공지사항이 없습니다.</div></div>
+            <div class="empty-state"><div class="empty-icon"></div><div>등록된 공지사항이 없습니다.</div></div>
         </c:when>
         <c:otherwise>
         <div class="inquiry-list">
@@ -102,8 +102,8 @@
                 <span class="badge-notice">공지</span>
             </div>
             <div class="card-meta">
-                <span class="author">👤 ${b.username}</span>
-                <span>🕐 ${b.createdAt}</span>
+                <span class="author">${b.username}</span>
+                <span>${b.createdAt}</span>
             </div>
         </a>
         </c:forEach>
@@ -126,7 +126,7 @@
         <c:choose>
         <c:when test="${empty jsrInquiries}">
             <div class="empty-state">
-                <div class="empty-icon">📭</div>
+                <div class="empty-icon"></div>
                 <div style="margin-bottom:14px">아직 문의가 없습니다.</div>
                 <a href="<%= request.getContextPath() %>/board/write?type=INQUIRY" class="jsr-btn">문의 작성하기</a>
             </div>
@@ -139,13 +139,13 @@
                 <span class="card-no">#${b.boardId}</span>
                 <span class="card-title">${b.title}</span>
                 <c:choose>
-                    <c:when test="${b.answer != null}"><span class="badge-answered">✅ 답변완료</span></c:when>
-                    <c:otherwise><span class="badge-waiting">⏳ 답변대기</span></c:otherwise>
+                    <c:when test="${b.answer != null}"><span class="badge-answered">답변완료</span></c:when>
+                    <c:otherwise><span class="badge-waiting">답변대기</span></c:otherwise>
                 </c:choose>
             </div>
             <div class="card-meta">
-                <span class="author">👤 ${b.username}</span>
-                <span>🕐 ${b.createdAt}</span>
+                <span class="author">${b.username}</span>
+                <span>${b.createdAt}</span>
             </div>
         </a>
         </c:forEach>

@@ -166,15 +166,15 @@
                     <img src="<%= request.getContextPath() %>/static/images/${jsrProduct.imageUrl}"
                          alt="${jsrProduct.name}"
                          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                    <span style="display:none;align-items:center;justify-content:center;font-size:80px">📦</span>
+                    <span style="display:none;align-items:center;justify-content:center;font-size:80px">IMG</span>
                 </c:when>
                 <c:otherwise>
                     <c:choose>
-                        <c:when test="${jsrProduct.category == '전자기기'}">💻</c:when>
-                        <c:when test="${jsrProduct.category == '주변기기'}">🖱️</c:when>
-                        <c:when test="${jsrProduct.category == '저장장치'}">💾</c:when>
-                        <c:when test="${jsrProduct.category == '보안용품'}">🔒</c:when>
-                        <c:otherwise>📦</c:otherwise>
+                        <c:when test="${jsrProduct.category == '전자기기'}">PC</c:when>
+                        <c:when test="${jsrProduct.category == '주변기기'}">ACC</c:when>
+                        <c:when test="${jsrProduct.category == '저장장치'}">SSD</c:when>
+                        <c:when test="${jsrProduct.category == '보안용품'}">SEC</c:when>
+                        <c:otherwise>IMG</c:otherwise>
                     </c:choose>
                 </c:otherwise>
             </c:choose>
@@ -189,7 +189,7 @@
                 <fmt:formatNumber value="${jsrProduct.price}" pattern="#,###"/>원
             </div>
             <div class="product-stock ${jsrProduct.stock <= 10 ? 'low' : ''}">
-                재고 ${jsrProduct.stock}개${jsrProduct.stock <= 10 ? ' ⚠️ 품절 임박' : ''}
+                재고 ${jsrProduct.stock}개${jsrProduct.stock <= 10 ? ' 품절 임박' : ''}
             </div>
 <div class="buy-actions">
                 <%-- 장바구니 담기 --%>
@@ -198,7 +198,7 @@
                         수량:
                         <input type="number" name="quantity" value="1" min="1" max="${jsrProduct.stock}">
                         <input type="hidden" name="productId" value="${jsrProduct.productId}">
-                        <input type="submit" value="🛒 장바구니 담기" class="jsr-btn">
+                        <input type="submit" value="장바구니 담기" class="jsr-btn">
                     </div>
                 </form>
 
@@ -207,7 +207,7 @@
                     <input type="hidden" name="quantity"   value="1">
                     <input type="hidden" name="price"      value="${jsrProduct.price}">
                     <input type="hidden" name="totalPrice" value="${jsrProduct.price}">
-                    <input type="submit" value="⚡ 바로 구매" class="jsr-btn jsr-btn-danger">
+                    <input type="submit" value="바로 구매" class="jsr-btn jsr-btn-danger">
                 </form>
                 
 </div>
@@ -218,7 +218,7 @@
 
     <%-- 리뷰 목록 --%>
     <div class="review-section">
-        <h3>💬 리뷰 (${jsrReviews.size()}개)</h3>
+        <h3>리뷰 (${jsrReviews.size()}개)</h3>
 
         <c:forEach var="r" items="${jsrReviews}">
         <div class="jsr-review">
@@ -237,7 +237,7 @@
         <c:choose>
         <c:when test="${jsrIsBuyer}">
         <div class="review-form-box">
-            <h4>✏️ 리뷰 작성</h4>
+            <h4>리뷰 작성</h4>
             <form method="post" action="<%= request.getContextPath() %>/product/review">
                 <input type="hidden" name="productId" value="${jsrProduct.productId}">
                 <p>
@@ -261,7 +261,7 @@
         </c:when>
         <c:otherwise>
         <div class="review-form-box" style="text-align:center;color:#475569;padding:20px">
-            🛒 구매하신 고객만 리뷰를 작성할 수 있습니다.
+            구매하신 고객만 리뷰를 작성할 수 있습니다.
         </div>
         </c:otherwise>
         </c:choose>

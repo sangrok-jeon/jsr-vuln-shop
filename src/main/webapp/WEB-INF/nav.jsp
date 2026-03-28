@@ -119,7 +119,7 @@
 
 <nav class="jsr-nav">
     <%-- 브랜드 --%>
-    <a class="nav-brand" href="<%= request.getContextPath() %>/products">🛒 JSR Shop</a>
+    <a class="nav-brand" href="<%= request.getContextPath() %>/products">JSR Shop</a>
 
     <c:if test="${_isLoggedIn}">
         <%-- 일반 메뉴 --%>
@@ -131,7 +131,7 @@
         <span class="nav-sep">|</span>
         <a href="<%= request.getContextPath() %>/mypage">마이페이지</a>
         <span class="nav-sep">|</span>
-        <a href="<%= request.getContextPath() %>/board">💬 Q&amp;A</a>
+        <a href="<%= request.getContextPath() %>/board">Q&amp;A</a>
 
         <%-- 관리자 메뉴 --%>
         <c:if test="${_isAdmin}">
