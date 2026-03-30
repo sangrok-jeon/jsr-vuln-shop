@@ -186,7 +186,7 @@
                 <div>
                     <label class="field-label">비밀번호</label>
                     <div class="field-wrap">
-                        <span class="field-icon">SEC</span>
+                        <span class="field-icon"></span>
                         <input type="password" name="password" class="login-input"
                                placeholder="비밀번호를 입력하세요" autocomplete="current-password">
                     </div>
