@@ -295,16 +295,16 @@
                         <img src="<%= request.getContextPath() %>/static/images/${p.imageUrl}"
                              alt="${p.name}" class="prod-thumb"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span class="prod-thumb-ph" style="display:none">IMG</span>
+                        <span class="prod-thumb-ph" style="display:none">이미지</span>
                     </c:when>
                     <c:otherwise>
                         <span class="prod-thumb-ph">
                             <c:choose>
                                 <c:when test="${p.category=='전자기기'}">PC</c:when>
                                 <c:when test="${p.category=='주변기기'}">ACC</c:when>
-                                <c:when test="${p.category=='저장장치'}">SSD</c:when>
-                                <c:when test="${p.category=='보안용품'}">SEC</c:when>
-                                <c:otherwise>IMG</c:otherwise>
+                                <c:when test="${p.category=='저장장치'}">저장</c:when>
+                                <c:when test="${p.category=='보안용품'}">보안</c:when>
+                                <c:otherwise>이미지</c:otherwise>
                             </c:choose>
                         </span>
                     </c:otherwise>

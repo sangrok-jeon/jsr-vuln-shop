@@ -87,15 +87,15 @@
                 <c:when test="${not empty jsrProduct.imageUrl}">
                     <img src="<%= request.getContextPath() %>/static/images/${jsrProduct.imageUrl}"
                          alt="${jsrProduct.name}"
-                         onerror="this.style.display='none';this.parentNode.innerHTML='IMG'">
+                         onerror="this.style.display='none';this.parentNode.innerHTML='이미지'">
                 </c:when>
                 <c:otherwise>
                     <c:choose>
                         <c:when test="${jsrProduct.category=='전자기기'}">PC</c:when>
                         <c:when test="${jsrProduct.category=='주변기기'}">ACC</c:when>
-                        <c:when test="${jsrProduct.category=='저장장치'}">SSD</c:when>
-                        <c:when test="${jsrProduct.category=='보안용품'}">SEC</c:when>
-                        <c:otherwise>IMG</c:otherwise>
+                        <c:when test="${jsrProduct.category=='저장장치'}">저장</c:when>
+                        <c:when test="${jsrProduct.category=='보안용품'}">보안</c:when>
+                        <c:otherwise>이미지</c:otherwise>
                     </c:choose>
                 </c:otherwise>
             </c:choose>
@@ -117,9 +117,9 @@
                 <c:when test="${not empty item.imageUrl}">
                     <img src="<%= request.getContextPath() %>/static/images/${item.imageUrl}"
                          alt="${item.productName}"
-                         onerror="this.style.display='none';this.parentNode.innerHTML='IMG'">
+                         onerror="this.style.display='none';this.parentNode.innerHTML='이미지'">
                 </c:when>
-                <c:otherwise>IMG</c:otherwise>
+                <c:otherwise>이미지</c:otherwise>
             </c:choose>
         </div>
         <div>

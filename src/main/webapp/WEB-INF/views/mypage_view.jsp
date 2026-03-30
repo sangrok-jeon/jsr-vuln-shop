@@ -212,9 +212,9 @@
                         <img src="<%= request.getContextPath() %>/static/images/${o.imageUrl}"
                              alt="${o.productName}" class="order-thumb"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span class="order-thumb-ph" style="display:none">IMG</span>
+                        <span class="order-thumb-ph" style="display:none">이미지</span>
                     </c:when>
-                    <c:otherwise><span class="order-thumb-ph">IMG</span></c:otherwise>
+                    <c:otherwise><span class="order-thumb-ph">이미지</span></c:otherwise>
                 </c:choose>
             </td>
             <td style="color:#64748b;font-family:monospace">#${o.orderId}</td>
