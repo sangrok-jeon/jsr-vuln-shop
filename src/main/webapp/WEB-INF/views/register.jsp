@@ -100,7 +100,7 @@
                     <label class="field-label">비밀번호 
 </label>
                     <div class="field-wrap">
-                        <span class="field-icon">SEC</span>
+                        <span class="field-icon"></span>
                         <input type="password" name="password" class="reg-input"
                                placeholder="비밀번호 입력" required autocomplete="new-password">
                     </div>
