@@ -15,15 +15,10 @@ import java.util.List;
              "/admin/orders", "/admin/order_status"})
 public class AdminServlet extends HttpServlet {
 
-    private boolean checkAdmin(HttpServletRequest request, HttpServletResponse response)
+    private boolean checkLogin(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        JsrUser user = (JsrUser) request.getSession().getAttribute("jsrUser");
-        if (user == null) {
+        if (request.getSession().getAttribute("jsrUser") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
-            return false;
-        }
-        if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
-            response.sendRedirect(request.getContextPath() + "/products");
             return false;
         }
         return true;
@@ -33,7 +28,7 @@ public class AdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!checkAdmin(request, response)) return;
+        if (!checkLogin(request, response)) return;
         String path = request.getServletPath();
 
         if (path.equals("/admin/users")) {
@@ -66,7 +61,7 @@ public class AdminServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!checkAdmin(request, response)) return;
+        if (!checkLogin(request, response)) return;
         String path = request.getServletPath();
 
         if (path.equals("/admin/user_point")) {

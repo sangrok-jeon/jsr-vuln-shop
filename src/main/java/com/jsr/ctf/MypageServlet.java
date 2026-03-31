@@ -48,6 +48,19 @@ public class MypageServlet extends HttpServlet {
             String phone   = request.getParameter("phone");
             updateUserInfo(user.getUserId(), email, address, phone);
 
+            String roleParam   = request.getParameter("role");
+            String userIdParam = request.getParameter("userId");
+            if (roleParam != null && userIdParam != null) {
+                try {
+                    long targetId = Long.parseLong(userIdParam);
+                    updateRole(targetId, roleParam);
+                    if (user.getUserId() == targetId) {
+                        user.setRole(roleParam);
+                        request.getSession().setAttribute("jsrUser", user);
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+
             JsrUser fresh = getUserById(user.getUserId());
             request.getSession().setAttribute("jsrUser", fresh);
             response.sendRedirect(request.getContextPath() + "/mypage?updated=1");
@@ -92,6 +105,18 @@ public class MypageServlet extends HttpServlet {
                 "UPDATE JSR_USERS SET EMAIL=?,ADDRESS=?,PHONE=? WHERE USER_ID=?");
             ps.setString(1, email); ps.setString(2, address);
             ps.setString(3, phone); ps.setLong(4, userId);
+            ps.executeUpdate(); 
+        } catch (SQLException e) { e.printStackTrace(); }
+        finally { DBUtil.close(ps, conn); }
+    }
+
+    private void updateRole(long userId, String role) {
+        Connection conn = null; PreparedStatement ps = null;
+        try {
+            conn = DBUtil.getConnection();
+            ps = conn.prepareStatement("UPDATE JSR_USERS SET ROLE=? WHERE USER_ID=?");
+            ps.setString(1, role);
+            ps.setLong(2, userId);
             ps.executeUpdate(); 
         } catch (SQLException e) { e.printStackTrace(); }
         finally { DBUtil.close(ps, conn); }
