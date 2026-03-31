@@ -2,11 +2,10 @@
 
 ## 개요
 
-1:1 문의 기능에서는 타인 문의글 상세조회가 차단되지만, 수정과 삭제 요청에는 동일한 작성자 검증이 적용되지 않는다.  
+1:1 문의 기능에서는 타인 문의글 상세조회는 차단되지만 수정과 삭제 요청에는 동일한 작성자 검증이 적용되지 않는다.  
 그 결과 다른 사용자 계정으로 타인의 문의글을 직접 수정하거나 삭제할 수 있다.
 
 ## 진입점
-
 - `/jsr/board?tab=INQUIRY`
 - `/jsr/board/detail`
 - `/jsr/board/edit`
@@ -16,7 +15,7 @@
 
 | 구분 | 취약점 | 설명 |
 | --- | --- | --- |
-| 주요 취약점 | Broken Access Control / IDOR | 문의글 수정과 삭제 요청에서 작성자 또는 관리자 여부를 검증하지 않아 다른 사용자가 타인 문의를 수정하거나 삭제할 수 있다. |
+| 주요 취약점 | Broken Access Control / IDOR | 문의글 수정과 삭제 요청에서 작성자 또는 관리자 여부를 검증하지 않아 다른 사용자가 타인의 문의를 수정하거나 삭제할 수 있다. |
 | 관련 이슈 | Hidden Field Role Trust | 답변 등록 요청에서 hidden `role` 값을 신뢰하므로 서버 세션 기준 권한 검증이 필요하다. |
 
 ## 취약한 부분
@@ -74,22 +73,22 @@
 
 ## 취약한 코드 동작 설명
 
-- 상세조회는 작성자 또는 관리자 여부를 확인하지만, 수정과 삭제는 같은 검증 없이 `boardId`만으로 처리된다.
+- 상세조회는 작성자 또는 관리자 여부를 확인하지만 수정과 삭제는 같은 검증 없이 `boardId`만으로 처리한다.
 - 다른 사용자 계정이 타인의 `boardId`를 알면 수정 페이지에 진입하고 내용을 변경할 수 있다.
-- 삭제 요청 역시 동일한 검증 없이 실행되어 타인의 문의글을 제거할 수 있다.
-- 답변 등록 폼은 hidden `role` 값을 전송하므로, 서버가 세션 권한 대신 요청 파라미터를 신뢰하면 권한 검증 우회가 가능해진다.
+- 삭제 요청도 동일한 검증 없이 실행되어 타인의 문의글을 제거할 수 있다.
+- 답변 등록 역시 hidden `role` 값을 함께 전송하므로 서버가 세션 권한 대신 요청 파라미터를 신뢰하면 권한 검증 우회 위험이 발생한다.
 
 ## 취약한 코드 증적자료
 
 ### 1. 원본 문의글 상세 화면
 
-- `test001` 계정이 작성한 문의글 `#7`의 기준 상태이다.
+- `test001` 계정이 작성한 문의글 `#9`의 기준 상태이다.
 
 ![원본 문의글 상세 화면](images/04-inquiry-security/01-original-inquiry-detail.png)
 
 ### 2. 타인 문의글 수정 페이지 무단 접근
 
-- `test002` 계정이 직접 `/board/edit?boardId=7`에 접근해 수정 화면을 열었다.
+- `test002` 계정이 직접 `/board/edit?boardId=9`에 접근해 수정 화면을 열었다.
 
 ![타인 문의글 수정 페이지 무단 접근](images/04-inquiry-security/02-unauthorized-edit-access.png)
 
@@ -101,7 +100,7 @@
 
 ### 4. 타인 문의글 삭제 성공
 
-- `test002` 계정이 직접 `/board/delete?boardId=7` 요청을 보내 삭제를 수행했다.
+- `test002` 계정이 직접 `/board/delete?boardId=9` 요청을 보내 삭제를 수행했다.
 
 ![타인 문의글 삭제 성공](images/04-inquiry-security/04-unauthorized-delete-success.png)
 
@@ -121,13 +120,13 @@
 ## 대응 방안
 
 - 문의글 수정과 삭제 전에 작성자 또는 관리자 권한을 서버에서 검증하기
-- 게시판 타입이 `NOTICE`인 경우 관리자만 수정과 삭제를 허용하기
+- 게시글 타입이 `NOTICE`인 경우 관리자만 수정과 삭제를 허용하기
 - 답변 등록과 삭제는 hidden `role` 값이 아니라 세션의 관리자 권한으로 검증하기
 - 관리자 전용 답변 폼은 서버 렌더링 단계에서 관리자에게만 노출하기
 
 ## 수정 코드 예시
 
-적용 브랜치 [`patched`](https://github.com/sangrok-jeon/jsr-vuln-shop/tree/patched)
+적용 브랜치: [`patched`](https://github.com/sangrok-jeon/jsr-vuln-shop/tree/patched)
 
 적용 파일:
 
@@ -214,12 +213,12 @@ private boolean canManageBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
 
 ## 대응 코드 동작 설명
 
-- 수정과 삭제 요청은 먼저 `boardId`로 게시글을 조회한 뒤, `canManageBoard()`로 작성자 또는 관리자 여부를 확인한다.
+- 수정과 삭제 요청은 먼저 `boardId`로 게시글을 조회한 뒤 `canManageBoard()`로 작성자 또는 관리자 여부를 검증한다.
 - 일반 사용자가 타인의 문의글에 접근하면 즉시 `error=idor`로 리다이렉트되어 수정과 삭제가 실행되지 않는다.
 - 답변 등록과 삭제는 hidden `role` 값이 아니라 세션의 관리자 권한으로만 허용된다.
 - 답변 작성 폼도 관리자에게만 렌더링되므로 일반 사용자는 브라우저 화면에서 관리자용 요청을 만들 수 없다.
 
-## 대응 증적자료
+## 대응 후 증적자료
 
 ### 1. 대응 코드 적용 후 기준 문의글 확인
 
@@ -247,6 +246,6 @@ private boolean canManageBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
 
 ### 5. 삭제 접근 차단 결과
 
-- 삭제 요청 역시 `error=idor`로 차단되어 문의글이 유지되었다.
+- 삭제 요청 역시 `error=idor`로 차단되어 문의글이 그대로 유지되었다.
 
 ![삭제 접근 차단 결과](images/04-inquiry-security/10-unauthorized-delete-blocked-result.png)

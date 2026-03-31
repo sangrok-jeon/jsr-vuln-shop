@@ -2,11 +2,10 @@
 
 ## 개요
 
-마이페이지 기본 정보 수정 기능에서 확인한 권한 상승 취약점과 대응 방향을 정리한 문서이다.  
-일반 사용자 요청에 포함된 `role` 파라미터를 서버가 그대로 신뢰하면서, `USER` 계정이 `ADMIN` 권한으로 상승할 수 있었다.
+마이페이지 기본 정보 수정 기능에서 확인한 권한 상승 취약점과 그 대응 방향을 정리한 문서이다.  
+일반 사용자의 요청에 포함된 `role` 파라미터를 서버가 그대로 신뢰하면 `USER` 계정을 `ADMIN` 권한으로 상승시킬 수 있다.
 
 ## 진입점
-
 - `/jsr/mypage`
 - `/jsr/mypage/update`
 - `/jsr/admin/dashboard`
@@ -16,11 +15,11 @@
 | 구분 | 취약점 | 설명 |
 | --- | --- | --- |
 | 주요 취약점 | Privilege Escalation | 클라이언트가 전송한 `role` 값을 신뢰하여 일반 사용자가 관리자 권한으로 상승 가능 |
-| 관련 이슈 | Broken Access Control | 관리자 기능 접근 시 세션의 관리자 권한 검증이 충분하지 않음 |
+| 관련 이슈 | Broken Access Control | 관리자 기능 접근 시 세션의 실제 관리자 권한 검증이 부족함 |
 
 ## 취약한 부분
 
-마이페이지 정보 수정 요청에는 `userId`, `role` 값이 함께 포함된다. 서버는 세션에 저장된 사용자 권한 대신, 클라이언트가 전송한 `role` 파라미터를 그대로 받아 DB와 세션에 반영한다.
+마이페이지 정보 수정 요청에는 `userId`, `role` 값이 함께 포함된다. 서버는 세션에 저장된 사용자 권한이 아니라 클라이언트가 전송한 `role` 파라미터를 그대로 받아 DB와 세션에 반영한다.
 
 이 구조에서는 일반 사용자가 Burp Suite 등으로 요청을 가로챈 뒤 `role=USER`를 `role=ADMIN`으로 변조할 수 있고, 그 결과 관리자 메뉴와 관리자 대시보드 접근이 가능해진다.
 
@@ -73,24 +72,24 @@ private boolean checkLogin(HttpServletRequest request, HttpServletResponse respo
 ## 취약한 코드 동작 설명
 
 - 마이페이지 수정 요청에서 `role`, `userId`를 클라이언트 요청으로부터 그대로 받는다.
-- 서버는 세션 권한을 기준으로 권한 변경 가능 여부를 검사하지 않고 `updateRole()`을 실행한다.
-- 이후 세션의 `jsrUser.role`도 요청값으로 갱신하므로 UI에도 관리자 권한이 즉시 반영된다.
+- 서버는 세션 권한을 기준으로 권한 변경 가능 여부를 검증하지 않고 `updateRole()`를 실행한다.
+- 이후 세션의 `jsrUser.role`도 요청값으로 갱신되므로 UI에도 관리자 권한이 즉시 반영된다.
 - 관리자 페이지는 로그인 여부만 확인하고 실제 `ADMIN` 권한은 검사하지 않으므로, 상승된 세션으로 `/admin/dashboard`에 바로 접근할 수 있다.
 
 ## 취약한 코드 증적자료
 
-### 1. 권한 변조 대상 파라미터 확인
-
-- 일반 사용자의 마이페이지 수정 요청에 `userId=51`, `role=USER`가 함께 포함된 것을 확인하였다.
-- 이 요청에서 `role` 파라미터가 실제 권한 변조 대상이며, Burp Suite에서 `USER`를 `ADMIN`으로 변경해 전송할 수 있다.
-
-![권한 변조 대상 role 파라미터 확인](images/03-privilege-escalation/01-mypage-update-original-request.png)
-
-### 2. 권한 상승 전 일반 사용자 상태
+### 1. 권한 상승 전 일반 사용자 상태
 
 - 마이페이지 상단 역할 표시가 `USER`인 상태를 확인하였다.
 
 ![권한 상승 전 USER 상태](images/03-privilege-escalation/02-mypage-user-role-before-tampering.png)
+
+### 2. 권한 변조 대상 파라미터 확인
+
+- 일반 사용자의 마이페이지 수정 요청에 `userId=51`, `role=USER`가 포함되어 있음을 확인하였다.
+- 이 요청에서 `role` 파라미터가 실제 권한 변조 대상이므로 Burp Suite에서 `USER`를 `ADMIN`으로 변경해 전송할 수 있다.
+
+![권한 변조 대상 role 파라미터 확인](images/03-privilege-escalation/01-mypage-update-original-request.png)
 
 ### 3. 권한 상승 후 관리자 권한 반영
 
@@ -115,7 +114,7 @@ private boolean checkLogin(HttpServletRequest request, HttpServletResponse respo
 - `role`, `userId` 같은 권한 관련 파라미터를 클라이언트 요청에서 받지 않기
 - 수정 대상 사용자 정보는 세션의 `jsrUser` 기준으로만 처리하기
 - 관리자 기능 진입 시 세션의 `ROLE` 값을 서버에서 다시 검증하기
-- 숨김 필드(`hidden`) 값은 신뢰하지 않기
+- hidden field 값을 신뢰하지 않기
 
 ## 수정 코드 예시
 
@@ -165,8 +164,8 @@ private boolean checkAdmin(HttpServletRequest request, HttpServletResponse respo
 
 ## 대응 코드 동작 설명
 
-- 대응 코드에서는 권한 관련 값인 `role`, `userId`를 클라이언트 요청에서 받지 않는다.
-- 마이페이지 수정은 현재 로그인된 세션 사용자 ID만 사용하므로, Burp Suite로 `role=ADMIN`을 추가하거나 변조해도 권한 변경에 사용되지 않는다.
+- 대응 코드에서는 권한 관련 값인 `role`, `userId`를 클라이언트 요청에서 더 이상 받지 않는다.
+- 마이페이지 수정은 현재 로그인한 세션 사용자 ID만 사용하므로 Burp Suite로 `role=ADMIN`을 추가하거나 변조해도 권한 변경에 사용되지 않는다.
 - 관리자 페이지는 세션의 실제 권한이 `ADMIN`인지 서버에서 다시 검증하므로, 일반 사용자 세션으로는 `/admin/dashboard`에 직접 접근할 수 없다.
 
 ## 대응 후 증적자료
@@ -177,11 +176,11 @@ private boolean checkAdmin(HttpServletRequest request, HttpServletResponse respo
 
 ![정상 요청에서 role 파라미터 제거 확인](images/03-privilege-escalation/05-mypage-update-request-without-role.png)
 
-### 2. `role=ADMIN` 강제 추가 재시도
+### 2. `role=ADMIN` 강제 추가 시도
 
 - Burp Suite에서 `role=ADMIN` 파라미터를 수동으로 추가해 다시 전송하였다.
 
-![role=ADMIN 강제 추가 재시도](images/03-privilege-escalation/06-role-admin-parameter-tampering-attempt.png)
+![role=ADMIN 강제 추가 시도](images/03-privilege-escalation/06-role-admin-parameter-tampering-attempt.png)
 
 ### 3. 권한 상승 차단 확인
 
