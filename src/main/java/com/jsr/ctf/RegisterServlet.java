@@ -18,6 +18,7 @@ public class RegisterServlet extends HttpServlet {
         String email    = request.getParameter("email");
         String address  = request.getParameter("address");
         String phone    = request.getParameter("phone");
+        String passwordHash = PasswordUtil.hash(password);
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -27,7 +28,7 @@ public class RegisterServlet extends HttpServlet {
                 "INSERT INTO JSR_USERS (USER_ID, USERNAME, PASSWORD, EMAIL, ROLE, POINT, ADDRESS, PHONE, CREATED_AT) " +
                 "VALUES (JSR_USER_SEQ.NEXTVAL, ?, ?, ?, 'USER', 0, ?, ?, SYSDATE)");
             ps.setString(1, userid);
-            ps.setString(2, password);
+            ps.setString(2, passwordHash);
             ps.setString(3, email);
             ps.setString(4, address);
             ps.setString(5, phone);

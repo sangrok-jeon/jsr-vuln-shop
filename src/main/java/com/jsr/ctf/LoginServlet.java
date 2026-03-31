@@ -18,65 +18,47 @@ public class LoginServlet extends HttpServlet {
 
         JsrUser loginUser = null;
         Connection conn = null;
-        Statement  stmt = null;
-        ResultSet  rs   = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
         try {
-            System.out.println("==== [DEBUG] LoginServlet doPost called ====");
-            System.out.println("[DEBUG] userid   = [" + userid + "]");
-            System.out.println("[DEBUG] password = [" + password + "]");
-
             conn = DBUtil.getConnection();
-            System.out.println("[DEBUG] conn = " + conn);
 
-            Statement checkStmt = conn.createStatement();
+            String sql = "SELECT USER_ID, USERNAME, PASSWORD, EMAIL, ROLE, POINT, ADDRESS, PHONE "
+                    + "FROM JSR_USERS WHERE USERNAME = ?";
 
-            ResultSet checkRs1 = checkStmt.executeQuery(
-                    "SELECT SYS_CONTEXT('USERENV','SESSION_USER') FROM DUAL");
-            if (checkRs1.next()) {
-                System.out.println("[DEBUG] DB USER = " + checkRs1.getString(1));
-            }
-            checkRs1.close();
-
-            ResultSet checkRs2 = checkStmt.executeQuery("SELECT COUNT(*) FROM JSR_USERS");
-            if (checkRs2.next()) {
-                System.out.println("[DEBUG] JSR_USERS COUNT = " + checkRs2.getInt(1));
-            }
-            checkRs2.close();
-            checkStmt.close();
-
-           
-            userid   = filterSqli(userid);
-            password = filterSqli(password);
-
-            String sql = "SELECT * FROM JSR_USERS "
-                    + "WHERE USERNAME = '" + userid + "' "
-                    + "AND PASSWORD = '" + password + "'";
-
-            System.out.println("[DEBUG] sql = " + sql);
-
-            stmt = conn.createStatement();
-            rs   = stmt.executeQuery(sql);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, userid);
+            rs = ps.executeQuery();
 
             if (rs.next()) {
-                System.out.println("[DEBUG] LOGIN SUCCESS");
+                String storedPassword = rs.getString("PASSWORD");
+                boolean matched = PasswordUtil.matches(password, storedPassword);
+
+                if (matched && !PasswordUtil.isHashed(storedPassword)) {
+                    migrateLegacyPassword(conn, rs.getLong("USER_ID"), password);
+                }
+
+                if (!matched) {
+                    response.sendRedirect(request.getContextPath() + "/login?error=1");
+                    return;
+                }
+
                 loginUser = new JsrUser();
                 loginUser.setUserId(rs.getLong("USER_ID"));
                 loginUser.setUsername(rs.getString("USERNAME"));
-                loginUser.setPassword(rs.getString("PASSWORD"));
                 loginUser.setEmail(rs.getString("EMAIL"));
                 loginUser.setRole(rs.getString("ROLE"));
                 loginUser.setPoint(rs.getInt("POINT"));
                 loginUser.setAddress(rs.getString("ADDRESS"));
                 loginUser.setPhone(rs.getString("PHONE"));
-            } else {
-                System.out.println("[DEBUG] LOGIN FAIL - no row");
             }
         } catch (SQLException e) {
-                System.out.println("[DEBUG] sqlState = " + e.getSQLState());
-            e.printStackTrace();
+            getServletContext().log("Login lookup failed.");
+        } catch (IllegalStateException e) {
+            getServletContext().log("Password verification failed.");
         } finally {
-            DBUtil.close(rs, stmt, conn);
+            DBUtil.close(rs, ps, conn);
         }
 
         if (loginUser != null) {
@@ -100,14 +82,17 @@ public class LoginServlet extends HttpServlet {
                .forward(request, response);
     }
 
-    private String filterSqli(String input) {
-        if (input == null) return input;
-        // -- 주석 차단
-        input = input.replaceAll("--", "");
-        // # 주석 차단
-        input = input.replaceAll("#", "");
-        // /**/ 주석 차단
-        input = input.replaceAll("/\\*.*?\\*/", "");
-        return input;
+    private void migrateLegacyPassword(Connection conn, long userId, String rawPassword)
+            throws SQLException {
+        PreparedStatement updatePs = null;
+        try {
+            updatePs = conn.prepareStatement(
+                    "UPDATE JSR_USERS SET PASSWORD = ? WHERE USER_ID = ?");
+            updatePs.setString(1, PasswordUtil.hash(rawPassword));
+            updatePs.setLong(2, userId);
+            updatePs.executeUpdate();
+        } finally {
+            DBUtil.close(updatePs, null);
+        }
     }
 }
