@@ -153,9 +153,9 @@
                     <c:when test="${not empty jsrOrder.imageUrl}">
                         <img src="<%= request.getContextPath() %>/static/images/${jsrOrder.imageUrl}"
                              alt="${jsrOrder.productName}"
-                             onerror="this.style.display='none';this.parentNode.innerHTML='IMG'">
+                              onerror="this.style.display='none';this.parentNode.innerHTML='이미지'">
                     </c:when>
-                    <c:otherwise>IMG</c:otherwise>
+                    <c:otherwise>이미지</c:otherwise>
                 </c:choose>
             </div>
             <div>

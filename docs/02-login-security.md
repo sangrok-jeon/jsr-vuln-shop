@@ -26,11 +26,29 @@
 - 예시: `test'--`
 - `--`, `#`, `/**/` 등 일부 주석 패턴이 제거되어 우회가 실패한다.
 
+![주석 기반 우회 입력 화면](images/02-login/01-comment-based-bypass-failure-input.png)
+
+![주석 기반 우회 실패 디버그 로그](images/02-login/02-comment-based-bypass-failure-debug-log.png)
+
 ### 3. OR 조건 기반 우회는 성공
 
 - 예시: `test'or'1'='1`
 - 주석 제거 방식만으로는 boolean-based 조건 우회를 막지 못한다.
 - 조건식이 참이 되면서 인증 우회가 발생한다.
+
+![OR 조건 기반 우회 입력 화면](images/02-login/03-or-based-bypass-success-input.png)
+
+### 4. OR 조건 기반 우회 성공 디버그 로그
+
+- 동일 입력이 필터를 우회해 로그인 성공으로 이어지는 로그를 확인할 수 있다.
+
+![OR 조건 기반 우회 성공 디버그 로그](images/02-login/04-or-based-bypass-success-debug-log.png)
+
+### 5. 로그인 우회 후 상품 페이지 진입
+
+- OR 조건 기반 입력 이후 로그인 우회가 발생하면 상품 페이지로 이동한다.
+
+![로그인 우회 성공 후 상품 페이지](images/02-login/05-login-bypass-success-products-page.png)
 
 ## 확인 로그
 
@@ -118,7 +136,7 @@ private String filterSqli(String input) {
 
 ## 수정 코드 예시
 
-파일: [`src/main/java/com/jsr/ctf/LoginServlet.java`](../src/main/java/com/jsr/ctf/LoginServlet.java)
+파일: [`patched/src/main/java/com/jsr/ctf/LoginServlet.java`](https://github.com/sangrok-jeon/jsr-vuln-shop/blob/patched/src/main/java/com/jsr/ctf/LoginServlet.java)
 
 ```java
 String sql = "SELECT USER_ID, USERNAME, PASSWORD, EMAIL, ROLE, POINT, ADDRESS, PHONE "

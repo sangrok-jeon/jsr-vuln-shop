@@ -61,10 +61,10 @@
                             <img src="<%= request.getContextPath() %>/static/images/${item.imageUrl}"
                                  alt="${item.productName}" class="thumb"
                                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                            <span class="thumb-placeholder" style="display:none">IMG</span>
+                            <span class="thumb-placeholder" style="display:none">이미지</span>
                         </c:when>
                         <c:otherwise>
-                            <span class="thumb-placeholder">IMG</span>
+                            <span class="thumb-placeholder">이미지</span>
                         </c:otherwise>
                     </c:choose>
                 </td>

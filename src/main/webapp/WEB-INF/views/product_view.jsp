@@ -484,17 +484,17 @@
 
     <div class="hero-cards">
         <div class="hero-mini-card">
-            <div class="mc-icon">SEC</div>
+            <div class="mc-icon">보안</div>
             <div class="mc-label">보안용품</div>
             <div class="mc-val">최대 40%↓</div>
         </div>
         <div class="hero-mini-card">
-            <div class="mc-icon">SSD</div>
+            <div class="mc-icon">저장</div>
             <div class="mc-label">저장장치</div>
             <div class="mc-val">특가 진행</div>
         </div>
         <div class="hero-mini-card">
-            <div class="mc-icon">IMG</div>
+            <div class="mc-icon">배송</div>
             <div class="mc-label">무료배송</div>
             <div class="mc-val">오늘 한정</div>
         </div>
@@ -531,15 +531,15 @@
                         <img src="<%= request.getContextPath() %>/static/images/${p.imageUrl}"
                              alt="${p.name}"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;font-size:40px">IMG</span>
+                        <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;font-size:40px">이미지</span>
                     </c:when>
                     <c:otherwise>
                         <c:choose>
                             <c:when test="${p.category == '전자기기'}">PC</c:when>
                             <c:when test="${p.category == '주변기기'}">ACC</c:when>
-                            <c:when test="${p.category == '저장장치'}">SSD</c:when>
-                            <c:when test="${p.category == '보안용품'}">SEC</c:when>
-                            <c:otherwise>IMG</c:otherwise>
+                            <c:when test="${p.category == '저장장치'}">저장</c:when>
+                            <c:when test="${p.category == '보안용품'}">보안</c:when>
+                            <c:otherwise>이미지</c:otherwise>
                         </c:choose>
                     </c:otherwise>
                 </c:choose>
@@ -567,7 +567,7 @@
         <c:if test="${empty jsrProducts}">
             <c:forEach begin="1" end="6">
             <div class="pcard">
-                <div class="pcard-img" style="color:#334155">IMG</div>
+                <div class="pcard-img" style="color:#334155">이미지</div>
                 <div class="pcard-body">
                     <div class="pcard-cat">-</div>
                     <div class="pcard-name" style="color:#475569">상품 없음</div>
@@ -599,14 +599,14 @@
             </div>
         </a>
         <a href="<%= request.getContextPath() %>/products?category=저장장치" class="cat-card">
-            <div class="cat-icon">SSD</div>
+            <div class="cat-icon">저장</div>
             <div class="cat-info">
                 <div class="cat-name">저장장치</div>
                 <div class="cat-desc">SSD · HDD · USB</div>
             </div>
         </a>
         <a href="<%= request.getContextPath() %>/products?category=보안용품" class="cat-card">
-            <div class="cat-icon">SEC</div>
+            <div class="cat-icon">보안</div>
             <div class="cat-info">
                 <div class="cat-name">보안용품</div>
                 <div class="cat-desc">프라이버시 · 잠금장치</div>
@@ -644,9 +644,9 @@
         <a href="?category=주변기기"
            class="${param.category == '주변기기' ? 'active' : ''}">ACC 주변기기</a>
         <a href="?category=저장장치"
-           class="${param.category == '저장장치' ? 'active' : ''}">SSD 저장장치</a>
+           class="${param.category == '저장장치' ? 'active' : ''}">저장장치</a>
         <a href="?category=보안용품"
-           class="${param.category == '보안용품' ? 'active' : ''}">SEC 보안용품</a>
+           class="${param.category == '보안용품' ? 'active' : ''}">보안용품</a>
     </div>
 <c:if test="${not empty keyword}">
     <p class="search-result-info">
@@ -678,16 +678,16 @@
                              alt="${p.name}"
                              style="width:52px;height:52px;object-fit:cover;border-radius:8px;border:1px solid #334155;display:block"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span style="display:none;width:52px;height:52px;border-radius:8px;background:#263248;border:1px solid #334155;align-items:center;justify-content:center;font-size:22px">IMG</span>
+                        <span style="display:none;width:52px;height:52px;border-radius:8px;background:#263248;border:1px solid #334155;align-items:center;justify-content:center;font-size:22px">이미지</span>
                     </c:when>
                     <c:otherwise>
                         <span style="display:flex;width:52px;height:52px;border-radius:8px;background:#263248;border:1px solid #334155;align-items:center;justify-content:center;font-size:22px">
                             <c:choose>
                                 <c:when test="${p.category == '전자기기'}">PC</c:when>
                                 <c:when test="${p.category == '주변기기'}">ACC</c:when>
-                                <c:when test="${p.category == '저장장치'}">SSD</c:when>
-                                <c:when test="${p.category == '보안용품'}">SEC</c:when>
-                                <c:otherwise>IMG</c:otherwise>
+                                <c:when test="${p.category == '저장장치'}">저장</c:when>
+                                <c:when test="${p.category == '보안용품'}">보안</c:when>
+                                <c:otherwise>이미지</c:otherwise>
                             </c:choose>
                         </span>
                     </c:otherwise>

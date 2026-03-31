@@ -2,8 +2,8 @@
 
 ## 개요
 
-1:1 문의 기능에서는 타인 문의글 상세조회가 차단되지만, 수정과 삭제 요청에는 동일한 작성자 검증이 적용되지 않는다.  
-그 결과 다른 사용자 계정으로 타인의 문의글을 직접 수정하거나 삭제할 수 있다.
+1:1 문의 기능에서 확인한 `Broken Access Control / IDOR` 취약점과 대응 내용을 정리한다.  
+문의 상세 조회는 타인 글 접근을 일부 차단하고 있었지만, 수정과 삭제 요청에는 같은 수준의 작성자/관리자 검증이 적용되지 않아 다른 사용자가 타인의 문의를 수정하거나 삭제할 수 있었다.
 
 ## 진입점
 
@@ -16,13 +16,13 @@
 
 | 구분 | 취약점 | 설명 |
 | --- | --- | --- |
-| 주요 취약점 | Broken Access Control / IDOR | 문의글 수정과 삭제 요청에서 작성자 또는 관리자 여부를 검증하지 않아 다른 사용자가 타인 문의를 수정하거나 삭제할 수 있다. |
-| 관련 이슈 | Hidden Field Role Trust | 답변 등록 요청에서 hidden `role` 값을 신뢰하므로 서버 세션 기준 권한 검증이 필요하다. |
+| 주요 취약점 | Broken Access Control / IDOR | 문의 수정 및 삭제 요청에서 작성자 또는 관리자 여부를 검증하지 않아 다른 사용자가 타인의 문의를 변경하거나 삭제할 수 있다. |
+| 관련 이슈 | Hidden Field Role Trust | 답변 등록 폼에서 hidden `role` 값을 함께 전송하므로, 서버는 요청 파라미터가 아니라 세션 기준으로 권한을 검증해야 한다. |
 
 ## 취약한 부분
 
-문의글 상세조회(`/board/detail`)는 작성자 또는 관리자만 접근할 수 있도록 제한되어 있지만, 수정(`/board/edit`)과 삭제(`/board/delete`)는 같은 `boardId`만 알면 실행된다.  
-동일한 게시판 기능 안에서도 접근 통제가 일관되지 않아 문의글 무단 수정과 삭제가 가능하다.
+문의 상세 조회(`/board/detail`)는 타인의 문의글에 대한 접근을 제한하고 있었지만, 수정(`/board/edit`)과 삭제(`/board/delete`)는 `boardId`만 있으면 처리되는 구조였다.  
+즉 같은 게시판 기능 안에서도 조회와 수정·삭제의 접근통제 수준이 일치하지 않았고, 다른 사용자가 URL의 `boardId`만 바꿔 타인의 문의글을 수정하거나 삭제할 수 있었다.
 
 ## 취약한 코드
 
@@ -74,62 +74,63 @@
 
 ## 취약한 코드 동작 설명
 
-- 상세조회는 작성자 또는 관리자 여부를 확인하지만, 수정과 삭제는 같은 검증 없이 `boardId`만으로 처리된다.
-- 다른 사용자 계정이 타인의 `boardId`를 알면 수정 페이지에 진입하고 내용을 변경할 수 있다.
-- 삭제 요청 역시 동일한 검증 없이 실행되어 타인의 문의글을 제거할 수 있다.
-- 답변 등록 폼은 hidden `role` 값을 전송하므로, 서버가 세션 권한 대신 요청 파라미터를 신뢰하면 권한 검증 우회가 가능해진다.
+- `/board/detail`은 타인 문의에 대한 조회를 차단하지만, `/board/edit`와 `/board/delete`는 같은 수준의 작성자 검증 없이 `boardId`만으로 처리한다.
+- 다른 사용자 계정이 타인의 `boardId`를 알고 있으면 수정 페이지에 직접 접근할 수 있고, 변경 내용을 그대로 저장할 수 있다.
+- 삭제 요청도 동일하게 처리되어 타인의 문의글을 직접 삭제할 수 있다.
+- 답변 등록 폼은 hidden `role` 값을 전송하므로, 서버가 세션이 아닌 요청 파라미터를 신뢰할 경우 권한 우회 위험으로 이어질 수 있다.
 
 ## 취약한 코드 증적자료
 
-### 1. 원본 문의글 상세 화면
+### 1. 원본 문의 상세 확인
 
-- `test001` 계정이 작성한 문의글 `#7`의 기준 상태이다.
+- `test001` 계정으로 작성한 문의글 `#9`의 상세 화면이다.
 
-![원본 문의글 상세 화면](images/04-inquiry-security/01-original-inquiry-detail.png)
+![원본 문의 상세 확인](images/04-inquiry-security/01-original-inquiry-detail.png)
 
-### 2. 타인 문의글 수정 페이지 무단 접근
+### 2. 다른 사용자에 의한 수정 페이지 접근
 
-- `test002` 계정이 직접 `/board/edit?boardId=7`에 접근해 수정 화면을 열었다.
+- `test002` 계정으로 `/board/edit?boardId=9`에 직접 접근한 화면이다.
 
-![타인 문의글 수정 페이지 무단 접근](images/04-inquiry-security/02-unauthorized-edit-access.png)
+![다른 사용자에 의한 수정 페이지 접근](images/04-inquiry-security/02-unauthorized-edit-access.png)
 
-### 3. 타인 문의글 수정 결과 확인
+### 3. 수정 결과 반영 확인
 
-- `test001` 계정으로 다시 확인했을 때 본문이 `test002가 수정함.`으로 바뀌었다.
+- `test001` 계정으로 다시 확인했을 때 내용이 `test002가 수정함.`으로 변경된 것을 확인하였다.
 
-![타인 문의글 수정 결과 확인](images/04-inquiry-security/03-inquiry-modified-result.png)
+![수정 결과 반영 확인](images/04-inquiry-security/03-inquiry-modified-result.png)
 
-### 4. 타인 문의글 삭제 성공
+### 4. 다른 사용자에 의한 삭제 성공
 
-- `test002` 계정이 직접 `/board/delete?boardId=7` 요청을 보내 삭제를 수행했다.
+- `test002` 계정으로 `/board/delete?boardId=9` 요청을 수행해 삭제가 성공한 화면이다.
 
-![타인 문의글 삭제 성공](images/04-inquiry-security/04-unauthorized-delete-success.png)
+![다른 사용자에 의한 삭제 성공](images/04-inquiry-security/04-unauthorized-delete-success.png)
 
-### 5. 삭제 후 문의글 사라짐 확인
+### 5. 원본 작성자의 삭제 결과 확인
 
-- `test001` 계정으로 다시 조회했을 때 문의글이 목록에서 사라졌다.
+- `test001` 계정으로 다시 확인했을 때 문의글이 더 이상 존재하지 않는 것을 확인하였다.
 
-![삭제 후 문의글 사라짐 확인](images/04-inquiry-security/05-inquiry-deleted-confirmed.png)
+![원본 작성자의 삭제 결과 확인](images/04-inquiry-security/05-inquiry-deleted-confirmed.png)
 
 ## 영향
 
-- 타인 문의글 무단 수정 가능
-- 타인 문의글 무단 삭제 가능
-- 문의 이력 위변조 가능
-- 게시판 기능 내 접근 통제 정책 불일치
+- 다른 사용자가 타인의 문의글 내용을 임의로 변경할 수 있음
+- 다른 사용자가 타인의 문의글을 삭제할 수 있음
+- 문의 내용의 무결성과 신뢰성이 훼손됨
+- 고객 문의 이력 관리가 불가능해질 수 있음
+- 답변 등록 권한 검증이 부실할 경우 추가 권한 우회로 이어질 수 있음
 
 ## 대응 방안
 
-- 문의글 수정과 삭제 전에 작성자 또는 관리자 권한을 서버에서 검증하기
-- 게시판 타입이 `NOTICE`인 경우 관리자만 수정과 삭제를 허용하기
-- 답변 등록과 삭제는 hidden `role` 값이 아니라 세션의 관리자 권한으로 검증하기
-- 관리자 전용 답변 폼은 서버 렌더링 단계에서 관리자에게만 노출하기
+- 수정, 삭제, 답변 등록 전에 항상 `boardId` 기준 게시글을 조회하고 작성자 또는 관리자 여부를 검증
+- `NOTICE`, `INQUIRY` 타입별 접근 정책을 서버에서 일관되게 적용
+- hidden `role` 값을 신뢰하지 않고 세션의 실제 권한만 사용
+- 무단 접근 시 수정·삭제를 수행하지 않고 오류 또는 차단 결과를 반환
 
-## 수정 코드 예시
+## 수정 코드
 
-적용 브랜치 [`patched`](https://github.com/sangrok-jeon/jsr-vuln-shop/tree/patched)
+대응 코드 브랜치: [`patched`](https://github.com/sangrok-jeon/jsr-vuln-shop/tree/patched)
 
-적용 파일:
+대응 파일:
 
 - [`patched/src/main/java/com/jsr/ctf/BoardServlet.java`](https://github.com/sangrok-jeon/jsr-vuln-shop/blob/patched/src/main/java/com/jsr/ctf/BoardServlet.java)
 - [`patched/src/main/webapp/WEB-INF/views/board_detail_view.jsp`](https://github.com/sangrok-jeon/jsr-vuln-shop/blob/patched/src/main/webapp/WEB-INF/views/board_detail_view.jsp)
@@ -181,23 +182,6 @@ private boolean canManageBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
 }
 ```
 
-```java
-} else if (path.equals("/board/answer")) {
-    long boardId = Long.parseLong(request.getParameter("boardId"));
-    JsrBoard board = getBoardById(boardId);
-    if (board == null) {
-        response.sendRedirect(request.getContextPath() + "/board?error=notfound");
-        return;
-    }
-
-    String content = request.getParameter("content");
-    if (!isAdmin || !"INQUIRY".equals(board.getBoardType())) {
-        response.sendRedirect(request.getContextPath()
-            + "/board/detail?boardId=" + boardId + "&error=noperm");
-        return;
-    }
-```
-
 ```jsp
 <c:if test="${_isAdmin}">
     <div class="answer-form-card">
@@ -205,7 +189,7 @@ private boolean canManageBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
         <form method="post" action="<%= request.getContextPath() %>/board/answer">
             <input type="hidden" name="boardId" value="${jsrBoard.boardId}">
             <textarea name="content" class="answer-textarea"
-                      placeholder="답변 내용을 입력하세요" required></textarea>
+                      placeholder="답변 내용을 입력하세요." required></textarea>
             <input type="submit" value="답변 등록" class="jsr-btn">
         </form>
     </div>
@@ -214,39 +198,32 @@ private boolean canManageBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
 
 ## 대응 코드 동작 설명
 
-- 수정과 삭제 요청은 먼저 `boardId`로 게시글을 조회한 뒤, `canManageBoard()`로 작성자 또는 관리자 여부를 확인한다.
-- 일반 사용자가 타인의 문의글에 접근하면 즉시 `error=idor`로 리다이렉트되어 수정과 삭제가 실행되지 않는다.
-- 답변 등록과 삭제는 hidden `role` 값이 아니라 세션의 관리자 권한으로만 허용된다.
-- 답변 작성 폼도 관리자에게만 렌더링되므로 일반 사용자는 브라우저 화면에서 관리자용 요청을 만들 수 없다.
+- 수정과 삭제 요청은 모두 `canManageBoard()`를 거쳐 작성자 또는 관리자만 수행할 수 있도록 변경했다.
+- 권한이 없는 사용자가 수정이나 삭제를 시도하면 `error=idor` 또는 `error=noperm`으로 리다이렉트되어 실제 동작은 수행되지 않는다.
+- 답변 등록은 hidden `role` 값 대신 세션의 관리자 권한(`_isAdmin`)으로만 노출하고, 서버에서도 같은 기준으로 검증한다.
 
 ## 대응 증적자료
 
-### 1. 대응 코드 적용 후 기준 문의글 확인
+### 1. 대응 코드 적용 후 원본 문의 상세 확인
 
-- `test001` 계정이 새로 작성한 문의글 `#9`의 기준 상태이다.
+- 대응 코드 적용 후 `test001` 계정으로 작성한 문의글 `#10`의 상세 화면이다.
 
-![대응 코드 적용 후 기준 문의글 확인](images/04-inquiry-security/06-remediated-inquiry-detail.png)
+![대응 코드 적용 후 원본 문의 상세 확인](images/04-inquiry-security/06-remediated-inquiry-detail.png)
 
-### 2. 타인 문의글 수정 직접 접근 시도
+### 2. 무단 수정 시도 차단
 
-- `test002` 계정이 다시 `/board/edit?boardId=9`에 직접 접근을 시도했다.
+- `test002` 계정으로 `boardId=10` 수정 접근을 시도했지만 차단된 결과이다.
 
-![타인 문의글 수정 직접 접근 시도](images/04-inquiry-security/07-unauthorized-edit-attempt-fixed.png)
+![무단 수정 시도 차단](images/04-inquiry-security/07-unauthorized-edit-blocked-result.png)
 
-### 3. 수정 접근 차단 결과
+### 3. 무단 삭제 시도
 
-- 수정 요청은 `error=idor`로 차단되었다.
+- `test002` 계정으로 `boardId=10` 삭제를 직접 시도한 화면이다.
 
-![수정 접근 차단 결과](images/04-inquiry-security/08-unauthorized-edit-blocked-result.png)
+![무단 삭제 시도](images/04-inquiry-security/08-unauthorized-delete-attempt-fixed.png)
 
-### 4. 타인 문의글 삭제 직접 시도
+### 4. 삭제 차단 및 원본 글 유지 확인
 
-- `test002` 계정이 `/board/delete?boardId=9` 요청을 직접 실행했다.
+- 무단 삭제 시도 후에도 문의글이 그대로 유지되는 것을 확인하였다.
 
-![타인 문의글 삭제 직접 시도](images/04-inquiry-security/09-unauthorized-delete-attempt-fixed.png)
-
-### 5. 삭제 접근 차단 결과
-
-- 삭제 요청 역시 `error=idor`로 차단되어 문의글이 유지되었다.
-
-![삭제 접근 차단 결과](images/04-inquiry-security/10-unauthorized-delete-blocked-result.png)
+![삭제 차단 및 원본 글 유지 확인](images/04-inquiry-security/09-unauthorized-delete-blocked-result.png)

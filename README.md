@@ -15,9 +15,7 @@
 ## 브랜치 안내
 
 - `master`: 취약한 코드와 전체 분석 문서
-- `patched`: 실제 대응 코드가 반영된 브랜치
-
-현재 `patched` 브랜치에는 회원가입 비밀번호 해시 저장, 로그인 SQL Injection 대응, 마이페이지 권한 상승 대응, 문의 게시판 접근 통제 대응이 반영되어 있습니다.
+- `patched`: 실제 수정된 대응 코드
 
 ## 문서 목록
 
@@ -27,4 +25,4 @@
 | 2 | Login Security | SQL Injection, Sensitive Debug Logging | `/jsr/login` | [`docs/02-login-security.md`](docs/02-login-security.md) |
 | 3 | Privilege Escalation | Privilege Escalation, Broken Access Control | `/jsr/mypage`, `/jsr/admin/dashboard` | [`docs/03-privilege-escalation.md`](docs/03-privilege-escalation.md) |
 | 4 | Inquiry Security | Broken Access Control, IDOR | `/jsr/board?tab=INQUIRY`, `/jsr/board/edit`, `/jsr/board/delete` | [`docs/04-inquiry-security.md`](docs/04-inquiry-security.md) |
-| 5 | File Upload Security | Insecure File Upload, Web-Accessible Upload | `/jsr/board/write`, `/jsr/board/file` | [`docs/05-file-upload-security.md`](docs/05-file-upload-security.md) |
+| 5 | File Upload Security | Insecure File Upload, Web-Accessible Upload, Web Shell Upload | `/jsr/board/write`, `/jsr/uploads/*` | [`docs/05-file-upload-security.md`](docs/05-file-upload-security.md) |

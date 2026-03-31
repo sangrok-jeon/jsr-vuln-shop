@@ -102,7 +102,7 @@ public class MypageServlet extends HttpServlet {
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement("UPDATE JSR_USERS SET PASSWORD=? WHERE USER_ID=?");
-            ps.setString(1, password);
+            ps.setString(1, PasswordUtil.hash(password));
             ps.setLong(2, userId);
             ps.executeUpdate(); 
         } catch (SQLException e) { e.printStackTrace(); }
