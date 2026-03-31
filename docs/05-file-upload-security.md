@@ -203,6 +203,10 @@ private String handleFileUpload(Part filePart, HttpServletRequest request) throw
 
 ![권한 없는 사용자 접근 차단](images/05-file-upload-security/11-unauthorized-file-access-blocked.png)
 
-### 6. 위험한 파일 업로드 차단
+### 6. 위험한 파일 업로드 시도
 
-![위험한 파일 업로드 차단](images/05-file-upload-security/12-dangerous-file-upload-blocked.png)
+![위험한 파일 업로드 시도](images/05-file-upload-security/12-dangerous-file-upload-attempt.png)
+
+### 7. 위험한 파일 업로드 차단
+
+![위험한 파일 업로드 차단](images/05-file-upload-security/13-dangerous-file-upload-blocked.png)
