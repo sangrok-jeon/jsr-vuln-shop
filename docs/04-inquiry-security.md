@@ -1,29 +1,32 @@
 # 04. Inquiry Security
 
-## 媛쒖슂
+## 개요
 
-1:1 臾몄쓽 湲곕뒫?먯꽌?????臾몄쓽湲 ?곸꽭議고쉶??李⑤떒?섏?留??섏젙怨???젣 ?붿껌?먮뒗 ?숈씪???묒꽦??寃利앹씠 ?곸슜?섏? ?딅뒗??  
-洹?寃곌낵 ?ㅻⅨ ?ъ슜??怨꾩젙?쇰줈 ??몄쓽 臾몄쓽湲??吏곸젒 ?섏젙?섍굅????젣?????덈떎.
+1:1 문의 기능에서 확인한 `Broken Access Control / IDOR` 취약점과 대응 내용을 정리한다.  
+문의 상세 조회는 타인 글 접근을 일부 차단하고 있었지만, 수정과 삭제 요청에는 같은 수준의 작성자/관리자 검증이 적용되지 않아 다른 사용자가 타인의 문의를 수정하거나 삭제할 수 있었다.
 
-## 吏꾩엯??- `/jsr/board?tab=INQUIRY`
+## 진입점
+
+- `/jsr/board?tab=INQUIRY`
 - `/jsr/board/detail`
 - `/jsr/board/edit`
 - `/jsr/board/delete`
 
-## ?ы븿 ?댁뒋
+## 포함 이슈
 
-| 援щ텇 | 痍⑥빟??| ?ㅻ챸 |
+| 구분 | 취약점 | 설명 |
 | --- | --- | --- |
-| 二쇱슂 痍⑥빟??| Broken Access Control / IDOR | 臾몄쓽湲 ?섏젙怨???젣 ?붿껌?먯꽌 ?묒꽦???먮뒗 愿由ъ옄 ?щ?瑜?寃利앺븯吏 ?딆븘 ?ㅻⅨ ?ъ슜?먭? ??몄쓽 臾몄쓽瑜??섏젙?섍굅????젣?????덈떎. |
-| 愿???댁뒋 | Hidden Field Role Trust | ?듬? ?깅줉 ?붿껌?먯꽌 hidden `role` 媛믪쓣 ?좊ː?섎?濡??쒕쾭 ?몄뀡 湲곗? 沅뚰븳 寃利앹씠 ?꾩슂?섎떎. |
+| 주요 취약점 | Broken Access Control / IDOR | 문의 수정 및 삭제 요청에서 작성자 또는 관리자 여부를 검증하지 않아 다른 사용자가 타인의 문의를 변경하거나 삭제할 수 있다. |
+| 관련 이슈 | Hidden Field Role Trust | 답변 등록 폼에서 hidden `role` 값을 함께 전송하므로, 서버는 요청 파라미터가 아니라 세션 기준으로 권한을 검증해야 한다. |
 
-## 痍⑥빟??遺遺?
-臾몄쓽湲 ?곸꽭議고쉶(`/board/detail`)???묒꽦???먮뒗 愿由ъ옄留??묎렐?????덈룄濡??쒗븳?섏뼱 ?덉?留? ?섏젙(`/board/edit`)怨???젣(`/board/delete`)??媛숈? `boardId`留??뚮㈃ ?ㅽ뻾?쒕떎.  
-?숈씪??寃뚯떆??湲곕뒫 ?덉뿉?쒕룄 ?묎렐 ?듭젣媛 ?쇨??섏? ?딆븘 臾몄쓽湲 臾대떒 ?섏젙怨???젣媛 媛?ν븯??
+## 취약한 부분
 
-## 痍⑥빟??肄붾뱶
+문의 상세 조회(`/board/detail`)는 타인의 문의글에 대한 접근을 제한하고 있었지만, 수정(`/board/edit`)과 삭제(`/board/delete`)는 `boardId`만 있으면 처리되는 구조였다.  
+즉 같은 게시판 기능 안에서도 조회와 수정·삭제의 접근통제 수준이 일치하지 않았고, 다른 사용자가 URL의 `boardId`만 바꿔 타인의 문의글을 수정하거나 삭제할 수 있었다.
 
-?뚯씪: [`src/main/java/com/jsr/ctf/BoardServlet.java`](../src/main/java/com/jsr/ctf/BoardServlet.java)
+## 취약한 코드
+
+파일: [`src/main/java/com/jsr/ctf/BoardServlet.java`](../src/main/java/com/jsr/ctf/BoardServlet.java)
 
 ```java
 } else if (path.equals("/board/edit")) {
@@ -58,69 +61,76 @@
 }
 ```
 
-?뚯씪: [`src/main/webapp/WEB-INF/views/board_detail_view.jsp`](../src/main/webapp/WEB-INF/views/board_detail_view.jsp)
+파일: [`src/main/webapp/WEB-INF/views/board_detail_view.jsp`](../src/main/webapp/WEB-INF/views/board_detail_view.jsp)
 
 ```jsp
 <form method="post" action="<%= request.getContextPath() %>/board/answer">
     <input type="hidden" name="boardId" value="${jsrBoard.boardId}">
     <input type="hidden" name="role" value="${_navRole}">
     <textarea name="content" class="answer-textarea" required></textarea>
-    <input type="submit" value="?듬? ?깅줉" class="jsr-btn">
+    <input type="submit" value="답변 등록" class="jsr-btn">
 </form>
 ```
 
-## 痍⑥빟??肄붾뱶 ?숈옉 ?ㅻ챸
+## 취약한 코드 동작 설명
 
-- ?곸꽭議고쉶???묒꽦???먮뒗 愿由ъ옄 ?щ?瑜??뺤씤?섏?留??섏젙怨???젣??媛숈? 寃利??놁씠 `boardId`留뚯쑝濡?泥섎━?쒕떎.
-- ?ㅻⅨ ?ъ슜??怨꾩젙????몄쓽 `boardId`瑜??뚮㈃ ?섏젙 ?섏씠吏??吏꾩엯?섍퀬 ?댁슜??蹂寃쏀븷 ???덈떎.
-- ??젣 ?붿껌???숈씪??寃利??놁씠 ?ㅽ뻾?섏뼱 ??몄쓽 臾몄쓽湲???쒓굅?????덈떎.
-- ?듬? ?깅줉 ??떆 hidden `role` 媛믪쓣 ?④퍡 ?꾩넚?섎?濡??쒕쾭媛 ?몄뀡 沅뚰븳 ????붿껌 ?뚮씪誘명꽣瑜??좊ː?섎㈃ 沅뚰븳 寃利??고쉶 ?꾪뿕??諛쒖깮?쒕떎.
+- `/board/detail`은 타인 문의에 대한 조회를 차단하지만, `/board/edit`와 `/board/delete`는 같은 수준의 작성자 검증 없이 `boardId`만으로 처리한다.
+- 다른 사용자 계정이 타인의 `boardId`를 알고 있으면 수정 페이지에 직접 접근할 수 있고, 변경 내용을 그대로 저장할 수 있다.
+- 삭제 요청도 동일하게 처리되어 타인의 문의글을 직접 삭제할 수 있다.
+- 답변 등록 폼은 hidden `role` 값을 전송하므로, 서버가 세션이 아닌 요청 파라미터를 신뢰할 경우 권한 우회 위험으로 이어질 수 있다.
 
-## 痍⑥빟??肄붾뱶 利앹쟻?먮즺
+## 취약한 코드 증적자료
 
-### 1. ?먮낯 臾몄쓽湲 ?곸꽭 ?붾㈃
+### 1. 원본 문의 상세 확인
 
-- `test001` 怨꾩젙???묒꽦??臾몄쓽湲 `#9`??湲곗? ?곹깭?대떎.
+- `test001` 계정으로 작성한 문의글 `#9`의 상세 화면이다.
 
-![?먮낯 臾몄쓽湲 ?곸꽭 ?붾㈃](images/04-inquiry-security/01-original-inquiry-detail.png)
+![원본 문의 상세 확인](images/04-inquiry-security/01-original-inquiry-detail.png)
 
-### 2. ???臾몄쓽湲 ?섏젙 ?섏씠吏 臾대떒 ?묎렐
+### 2. 다른 사용자에 의한 수정 페이지 접근
 
-- `test002` 怨꾩젙??吏곸젒 `/board/edit?boardId=9`???묎렐???섏젙 ?붾㈃???댁뿀??
+- `test002` 계정으로 `/board/edit?boardId=9`에 직접 접근한 화면이다.
 
-![???臾몄쓽湲 ?섏젙 ?섏씠吏 臾대떒 ?묎렐](images/04-inquiry-security/02-unauthorized-edit-access.png)
+![다른 사용자에 의한 수정 페이지 접근](images/04-inquiry-security/02-unauthorized-edit-access.png)
 
-### 3. ???臾몄쓽湲 ?섏젙 寃곌낵 ?뺤씤
+### 3. 수정 결과 반영 확인
 
-- `test001` 怨꾩젙?쇰줈 ?ㅼ떆 ?뺤씤?덉쓣 ??蹂몃Ц??`test002媛 ?섏젙??`?쇰줈 諛붾뚯뿀??
+- `test001` 계정으로 다시 확인했을 때 내용이 `test002가 수정함.`으로 변경된 것을 확인하였다.
 
-![???臾몄쓽湲 ?섏젙 寃곌낵 ?뺤씤](images/04-inquiry-security/03-inquiry-modified-result.png)
+![수정 결과 반영 확인](images/04-inquiry-security/03-inquiry-modified-result.png)
 
-### 4. ???臾몄쓽湲 ??젣 ?깃났
+### 4. 다른 사용자에 의한 삭제 성공
 
-- `test002` 怨꾩젙??吏곸젒 `/board/delete?boardId=9` ?붿껌??蹂대궡 ??젣瑜??섑뻾?덈떎.
+- `test002` 계정으로 `/board/delete?boardId=9` 요청을 수행해 삭제가 성공한 화면이다.
 
-![???臾몄쓽湲 ??젣 ?깃났](images/04-inquiry-security/04-unauthorized-delete-success.png)
+![다른 사용자에 의한 삭제 성공](images/04-inquiry-security/04-unauthorized-delete-success.png)
 
-### 5. ??젣 ??臾몄쓽湲 ?щ씪吏??뺤씤
+### 5. 원본 작성자의 삭제 결과 확인
 
-- `test001` 怨꾩젙?쇰줈 ?ㅼ떆 議고쉶?덉쓣 ??臾몄쓽湲??紐⑸줉?먯꽌 ?щ씪議뚮떎.
+- `test001` 계정으로 다시 확인했을 때 문의글이 더 이상 존재하지 않는 것을 확인하였다.
 
-![??젣 ??臾몄쓽湲 ?щ씪吏??뺤씤](images/04-inquiry-security/05-inquiry-deleted-confirmed.png)
+![원본 작성자의 삭제 결과 확인](images/04-inquiry-security/05-inquiry-deleted-confirmed.png)
 
-## ?곹뼢
+## 영향
 
-- ???臾몄쓽湲 臾대떒 ?섏젙 媛??- ???臾몄쓽湲 臾대떒 ??젣 媛??- 臾몄쓽 ?대젰 ?꾨?議?媛??- 寃뚯떆??湲곕뒫 ???묎렐 ?듭젣 ?뺤콉 遺덉씪移?
-## ???諛⑹븞
+- 다른 사용자가 타인의 문의글 내용을 임의로 변경할 수 있음
+- 다른 사용자가 타인의 문의글을 삭제할 수 있음
+- 문의 내용의 무결성과 신뢰성이 훼손됨
+- 고객 문의 이력 관리가 불가능해질 수 있음
+- 답변 등록 권한 검증이 부실할 경우 추가 권한 우회로 이어질 수 있음
 
-- 臾몄쓽湲 ?섏젙怨???젣 ?꾩뿉 ?묒꽦???먮뒗 愿由ъ옄 沅뚰븳???쒕쾭?먯꽌 寃利앺븯湲?- 寃뚯떆湲 ??낆씠 `NOTICE`??寃쎌슦 愿由ъ옄留??섏젙怨???젣瑜??덉슜?섍린
-- ?듬? ?깅줉怨???젣??hidden `role` 媛믪씠 ?꾨땲???몄뀡??愿由ъ옄 沅뚰븳?쇰줈 寃利앺븯湲?- 愿由ъ옄 ?꾩슜 ?듬? ?쇱? ?쒕쾭 ?뚮뜑留??④퀎?먯꽌 愿由ъ옄?먭쾶留??몄텧?섍린
+## 대응 방안
 
-## ?섏젙 肄붾뱶 ?덉떆
+- 수정, 삭제, 답변 등록 전에 항상 `boardId` 기준 게시글을 조회하고 작성자 또는 관리자 여부를 검증
+- `NOTICE`, `INQUIRY` 타입별 접근 정책을 서버에서 일관되게 적용
+- hidden `role` 값을 신뢰하지 않고 세션의 실제 권한만 사용
+- 무단 접근 시 수정·삭제를 수행하지 않고 오류 또는 차단 결과를 반환
 
-?곸슜 釉뚮옖移? [`patched`](https://github.com/sangrok-jeon/jsr-vuln-shop/tree/patched)
+## 수정 코드
 
-?곸슜 ?뚯씪:
+대응 코드 브랜치: [`patched`](https://github.com/sangrok-jeon/jsr-vuln-shop/tree/patched)
+
+대응 파일:
 
 - [`patched/src/main/java/com/jsr/ctf/BoardServlet.java`](https://github.com/sangrok-jeon/jsr-vuln-shop/blob/patched/src/main/java/com/jsr/ctf/BoardServlet.java)
 - [`patched/src/main/webapp/WEB-INF/views/board_detail_view.jsp`](https://github.com/sangrok-jeon/jsr-vuln-shop/blob/patched/src/main/webapp/WEB-INF/views/board_detail_view.jsp)
@@ -172,66 +182,48 @@ private boolean canManageBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
 }
 ```
 
-```java
-} else if (path.equals("/board/answer")) {
-    long boardId = Long.parseLong(request.getParameter("boardId"));
-    JsrBoard board = getBoardById(boardId);
-    if (board == null) {
-        response.sendRedirect(request.getContextPath() + "/board?error=notfound");
-        return;
-    }
-
-    String content = request.getParameter("content");
-    if (!isAdmin || !"INQUIRY".equals(board.getBoardType())) {
-        response.sendRedirect(request.getContextPath()
-            + "/board/detail?boardId=" + boardId + "&error=noperm");
-        return;
-    }
-```
-
 ```jsp
 <c:if test="${_isAdmin}">
     <div class="answer-form-card">
-        <h3>?듬? ?묒꽦</h3>
+        <h3>답변 작성</h3>
         <form method="post" action="<%= request.getContextPath() %>/board/answer">
             <input type="hidden" name="boardId" value="${jsrBoard.boardId}">
             <textarea name="content" class="answer-textarea"
-                      placeholder="?듬? ?댁슜???낅젰?섏꽭?? required></textarea>
-            <input type="submit" value="?듬? ?깅줉" class="jsr-btn">
+                      placeholder="답변 내용을 입력하세요." required></textarea>
+            <input type="submit" value="답변 등록" class="jsr-btn">
         </form>
     </div>
 </c:if>
 ```
 
-## ???肄붾뱶 ?숈옉 ?ㅻ챸
+## 대응 코드 동작 설명
 
-- ?섏젙怨???젣 ?붿껌? 癒쇱? `boardId`濡?寃뚯떆湲??議고쉶????`canManageBoard()`濡??묒꽦???먮뒗 愿由ъ옄 ?щ?瑜?寃利앺븳??
-- ?쇰컲 ?ъ슜?먭? ??몄쓽 臾몄쓽湲???묎렐?섎㈃ 利됱떆 `error=idor`濡?由щ떎?대젆?몃릺???섏젙怨???젣媛 ?ㅽ뻾?섏? ?딅뒗??
-- ?듬? ?깅줉怨???젣??hidden `role` 媛믪씠 ?꾨땲???몄뀡??愿由ъ옄 沅뚰븳?쇰줈留??덉슜?쒕떎.
-- ?듬? ?묒꽦 ?쇰룄 愿由ъ옄?먭쾶留??뚮뜑留곷릺誘濡??쇰컲 ?ъ슜?먮뒗 釉뚮씪?곗? ?붾㈃?먯꽌 愿由ъ옄???붿껌??留뚮뱾 ???녿떎.
+- 수정과 삭제 요청은 모두 `canManageBoard()`를 거쳐 작성자 또는 관리자만 수행할 수 있도록 변경했다.
+- 권한이 없는 사용자가 수정이나 삭제를 시도하면 `error=idor` 또는 `error=noperm`으로 리다이렉트되어 실제 동작은 수행되지 않는다.
+- 답변 등록은 hidden `role` 값 대신 세션의 관리자 권한(`_isAdmin`)으로만 노출하고, 서버에서도 같은 기준으로 검증한다.
 
-## ?????利앹쟻?먮즺
+## 대응 증적자료
 
-### 1. 대응 코드 적용 후 기준 문의글 확인
+### 1. 대응 코드 적용 후 원본 문의 상세 확인
 
-- `test001` 계정이 새로 작성한 문의글 `#10`의 기준 상태이다.
+- 대응 코드 적용 후 `test001` 계정으로 작성한 문의글 `#10`의 상세 화면이다.
 
-![대응 코드 적용 후 기준 문의글 확인](images/04-inquiry-security/06-remediated-inquiry-detail.png)
+![대응 코드 적용 후 원본 문의 상세 확인](images/04-inquiry-security/06-remediated-inquiry-detail.png)
 
-### 2. 타인 문의글 수정 접근 차단 결과
+### 2. 무단 수정 시도 차단
 
-- `test002` 계정이 `/board/edit?boardId=10`으로 접근을 시도했지만 `error=idor`로 차단되었다.
+- `test002` 계정으로 `boardId=10` 수정 접근을 시도했지만 차단된 결과이다.
 
-![타인 문의글 수정 접근 차단 결과](images/04-inquiry-security/07-unauthorized-edit-blocked-result.png)
+![무단 수정 시도 차단](images/04-inquiry-security/07-unauthorized-edit-blocked-result.png)
 
-### 3. 타인 문의글 삭제 직접 시도
+### 3. 무단 삭제 시도
 
-- `test002` 계정이 `/board/delete?boardId=10` 요청을 직접 실행했다.
+- `test002` 계정으로 `boardId=10` 삭제를 직접 시도한 화면이다.
 
-![타인 문의글 삭제 직접 시도](images/04-inquiry-security/08-unauthorized-delete-attempt-fixed.png)
+![무단 삭제 시도](images/04-inquiry-security/08-unauthorized-delete-attempt-fixed.png)
 
-### 4. 삭제 접근 차단 결과
+### 4. 삭제 차단 및 원본 글 유지 확인
 
-- 삭제 요청 역시 `error=idor`로 차단되어 문의글이 그대로 유지되었다.
+- 무단 삭제 시도 후에도 문의글이 그대로 유지되는 것을 확인하였다.
 
-![삭제 접근 차단 결과](images/04-inquiry-security/09-unauthorized-delete-blocked-result.png)
+![삭제 차단 및 원본 글 유지 확인](images/04-inquiry-security/09-unauthorized-delete-blocked-result.png)
