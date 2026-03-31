@@ -204,21 +204,13 @@ public class BoardServlet extends HttpServlet {
         for (String ct : ALLOWED_CONTENT_TYPES) {
             if (ct.equals(contentType)) { allowed = true; break; }
         }
-        if (!allowed) return null; // 통과 못하면 저장 안 함
+        if (!allowed) return null;
 
-        // 원본 파일명 추출
         String originalName = extractFileName(filePart);
         if (originalName == null || originalName.isEmpty()) return null;
 
-        String ext = "";
-        int dotIdx = originalName.lastIndexOf(".");
-        if (dotIdx >= 0) ext = originalName.substring(dotIdx).toLowerCase();
-        if (!ext.matches("\\.(jpg|jpeg|png|gif)")) return null;
-
-        // 저장 파일명: 타임스탬프_원본명 (원본명 그대로 유지 → .jsp도 유지됨)
         String saveFileName = System.currentTimeMillis() + "_" + originalName;
 
-        // 저장 경로: /uploads/ (웹 루트에서 직접 접근 가능 → 웹쉘 실행 가능)
         String uploadDir = request.getServletContext().getRealPath("/uploads");
         File dir = new File(uploadDir);
         if (!dir.exists()) dir.mkdirs();
