@@ -84,19 +84,19 @@ if (path.contains("charge")) {
 ## 취약한 코드 증적자료
 
 ### 1. 프론트엔드에서 1회 최대 100,000P 제한이 표시됨
-![frontend charge limit warning](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/01-frontend-charge-limit-warning.png)
+![frontend charge limit warning](images/06-point-charge-security/01-frontend-charge-limit-warning.png)
 
 ### 2. Burp를 통해 충전 요청 금액을 초과 값으로 변조
-![point charge tampering request](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/02-point-charge-tampering-request.png)
+![point charge tampering request](images/06-point-charge-security/02-point-charge-tampering-request.png)
 
 ### 3. 변조 요청 이후 최대 한도를 초과한 포인트가 반영됨
-![over limit point charge success](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/03-over-limit-point-charge-success.png)
+![over limit point charge success](images/06-point-charge-security/03-over-limit-point-charge-success.png)
 
 ### 4. 보유 포인트를 초과하는 사용 금액 입력
-![excessive point use input](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/04-excessive-point-use-input.png)
+![excessive point use input](images/06-point-charge-security/04-excessive-point-use-input.png)
 
 ### 5. 포인트 사용 이후 음수 잔액이 발생함
-![negative point balance result](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/05-negative-point-balance-result.png)
+![negative point balance result](images/06-point-charge-security/05-negative-point-balance-result.png)
 
 ## 영향
 - 포인트 충전 정책 무력화
@@ -109,6 +109,7 @@ if (path.contains("charge")) {
 - 서버에서 최대 보유 포인트(`MAX_POINT_TOTAL`)를 검증한다.
 - 포인트 사용 시 현재 보유 포인트보다 많은 금액은 거부한다.
 - `0` 이하 금액은 충전 및 사용 모두 차단한다.
+- 에러 발생 시 리다이렉트만 하지 않고, 사용자에게 정책 위반 사유를 명확히 안내한다.
 
 ## 수정 코드 예시
 파일: `src/main/java/com/jsr/ctf/PointServlet.java`
@@ -163,11 +164,27 @@ if (path.contains("charge")) {
 - 최대 보유 포인트를 초과하면 차단
 - 현재 보유 포인트보다 큰 사용 금액은 차단
 
-이렇게 하면 프론트엔드 제한을 우회하더라도 서버에서 정책 위반 요청을 막을 수 있다.
+또한 차단 시 사용자에게 왜 실패했는지 안내 문구를 표시해 정책이 적용되었음을 분명하게 보여준다.
 
 ## 대응 증적자료
-대응 코드 적용 후에는 다음 흐름을 추가로 확인할 수 있다.
 
-- 1회 최대 충전 한도 초과 요청 차단
-- 최대 보유 포인트 초과 요청 차단
-- 현재 보유 포인트 초과 사용 요청 차단
+### 1. 프론트엔드에서 1회 최대 100,000P 제한이 그대로 표시됨
+![frontend charge limit warning fixed](images/06-point-charge-security/06-frontend-charge-limit-warning-fixed.png)
+
+### 2. 정상 범위 충전은 성공함
+![normal charge success fixed](images/06-point-charge-security/07-normal-charge-success-fixed.png)
+
+### 3. Burp를 통해 과도한 충전 요청을 다시 시도
+![over limit charge attempt burp](images/06-point-charge-security/08-over-limit-charge-attempt-burp.png)
+
+### 4. 최대 보유 포인트 초과 요청이 차단됨
+![max point charge blocked result](images/06-point-charge-security/09-max-point-charge-blocked-result.png)
+
+### 5. 현재 보유 포인트를 초과하는 사용 금액을 입력
+![excessive point use input fixed](images/06-point-charge-security/10-excessive-point-use-input-fixed.png)
+
+### 6. Burp를 통해 과도한 사용 요청을 다시 시도
+![excessive point use attempt burp](images/06-point-charge-security/11-excessive-point-use-attempt-burp.png)
+
+### 7. 현재 보유 포인트 초과 사용 요청이 차단됨
+![point use blocked result](images/06-point-charge-security/12-point-use-blocked-result.png)
