@@ -27,3 +27,4 @@
 | 2 | Login Security | SQL Injection, Sensitive Debug Logging | `/jsr/login` | [`docs/02-login-security.md`](docs/02-login-security.md) |
 | 3 | Privilege Escalation | Privilege Escalation, Broken Access Control | `/jsr/mypage`, `/jsr/admin/dashboard` | [`docs/03-privilege-escalation.md`](docs/03-privilege-escalation.md) |
 | 4 | Inquiry Security | Broken Access Control, IDOR | `/jsr/board?tab=INQUIRY`, `/jsr/board/edit`, `/jsr/board/delete` | [`docs/04-inquiry-security.md`](docs/04-inquiry-security.md) |
+| 5 | File Upload Security | Insecure File Upload, Web-Accessible Upload | `/jsr/board/write`, `/jsr/board/file` | [`docs/05-file-upload-security.md`](docs/05-file-upload-security.md) |

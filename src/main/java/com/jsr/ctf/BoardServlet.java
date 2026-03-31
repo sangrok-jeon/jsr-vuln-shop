@@ -281,8 +281,14 @@ public class BoardServlet extends HttpServlet {
         if (!ext.matches("\\.(jpg|jpeg|png|gif)")) return null;
 
         byte[] fileBytes;
-        try (InputStream is = filePart.getInputStream()) {
-            fileBytes = is.readAllBytes();
+        try (InputStream is = filePart.getInputStream();
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = is.read(buf)) != -1) {
+                baos.write(buf, 0, len);
+            }
+            fileBytes = baos.toByteArray();
         }
         if (fileBytes.length == 0) return null;
         if (ImageIO.read(new ByteArrayInputStream(fileBytes)) == null) return null;

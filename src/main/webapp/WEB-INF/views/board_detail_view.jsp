@@ -70,8 +70,8 @@
                 <div class="attach-box">
                     <span style="color:#475569">첨부:</span>
                     <a class="attach-link"
-                       href="<%= request.getContextPath() %>/uploads/${jsrBoard.attachFile}"
-                       target="_blank">${jsrBoard.attachFile}</a>
+                       href="<%= request.getContextPath() %>/board/file?boardId=${jsrBoard.boardId}"
+                       target="_blank">첨부파일 보기</a>
                 </div>
             </c:if>
 
