@@ -71,6 +71,8 @@ private String handleFileUpload(Part filePart, HttpServletRequest request) throw
 
 ## 취약한 코드 동작 설명
 
+- 기본 상태에서 `.jsp` 파일을 그대로 업로드하면 `Content-Type`이 허용 목록과 일치하지 않아 첨부가 저장되지 않는다.
+- 그러나 서버가 요청 메타데이터인 `Content-Type`을 신뢰하기 때문에, 해당 값이 허용되는 이미지 타입으로 바뀌면 동일한 파일도 업로드 흐름을 통과할 수 있다.
 - 서버는 요청에 포함된 `Content-Type`을 기준으로 업로드 허용 여부를 판단한다.
 - 업로드 파일은 원본 파일명을 포함한 이름으로 저장되어 저장된 파일 이름과 업로드한 파일 사이의 연관성이 남는다.
 - 저장 경로가 웹 루트 하위 `/uploads` 이기 때문에 저장 후 직접 URL로 접근 가능하다.
@@ -85,21 +87,29 @@ private String handleFileUpload(Part filePart, HttpServletRequest request) throw
 
 ## 취약한 코드 증적자료
 
-### 1. 위험한 파일 선택
+### 1. 기본 JSP 파일 선택
 
-![위험한 파일 선택](images/05-file-upload-security/01-dangerous-file-selected.png)
+![기본 JSP 파일 선택](images/05-file-upload-security/01-plain-jsp-file-selected.png)
 
-### 2. 요청 메타데이터 변조 확인
+### 2. 기본 업로드 요청 확인
 
-![요청 메타데이터 변조 확인](images/05-file-upload-security/02-content-type-tampering-request.png)
+![기본 업로드 요청 확인](images/05-file-upload-security/02-plain-jsp-upload-request.png)
 
-### 3. 업로드된 첨부 링크 노출
+### 3. 기본 업로드 실패 결과
 
-![업로드된 첨부 링크 노출](images/05-file-upload-security/03-uploaded-webshell-link-exposed.png)
+![기본 업로드 실패 결과](images/05-file-upload-security/03-plain-jsp-upload-failed.png)
 
-### 4. 업로드 파일 실행 결과 확인
+### 4. Content-Type 변조 요청
 
-![업로드 파일 실행 결과 확인](images/05-file-upload-security/04-webshell-execution-confirmed.png)
+![Content-Type 변조 요청](images/05-file-upload-security/04-content-type-tampering-upload-request.png)
+
+### 5. 업로드된 첨부 링크 노출
+
+![업로드된 첨부 링크 노출](images/05-file-upload-security/05-uploaded-webshell-link-exposed.png)
+
+### 6. 업로드 파일 실행 결과 확인
+
+![업로드 파일 실행 결과 확인](images/05-file-upload-security/06-webshell-execution-confirmed.png)
 
 ## 영향
 
@@ -175,24 +185,24 @@ private String handleFileUpload(Part filePart, HttpServletRequest request) throw
 
 ### 1. 정상 이미지 업로드 성공
 
-![정상 이미지 업로드 성공](images/05-file-upload-security/05-safe-image-upload-success.png)
+![정상 이미지 업로드 성공](images/05-file-upload-security/07-safe-image-upload-success.png)
 
 ### 2. 보호된 첨부 링크 제공
 
-![보호된 첨부 링크 제공](images/05-file-upload-security/06-protected-file-link.png)
+![보호된 첨부 링크 제공](images/05-file-upload-security/08-protected-file-link.png)
 
 ### 3. 소유자 기준 다운로드 성공
 
-![소유자 기준 다운로드 성공](images/05-file-upload-security/07-owner-file-download-success.png)
+![소유자 기준 다운로드 성공](images/05-file-upload-security/09-owner-file-download-success.png)
 
 ### 4. 권한 없는 사용자 접근 시도
 
-![권한 없는 사용자 접근 시도](images/05-file-upload-security/08-unauthorized-file-access-attempt.png)
+![권한 없는 사용자 접근 시도](images/05-file-upload-security/10-unauthorized-file-access-attempt.png)
 
 ### 5. 권한 없는 사용자 접근 차단
 
-![권한 없는 사용자 접근 차단](images/05-file-upload-security/09-unauthorized-file-access-blocked.png)
+![권한 없는 사용자 접근 차단](images/05-file-upload-security/11-unauthorized-file-access-blocked.png)
 
 ### 6. 위험한 파일 업로드 차단
 
-![위험한 파일 업로드 차단](images/05-file-upload-security/10-dangerous-file-upload-blocked.png)
+![위험한 파일 업로드 차단](images/05-file-upload-security/12-dangerous-file-upload-blocked.png)
