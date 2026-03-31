@@ -4,13 +4,15 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
+import javax.imageio.ImageIO;
 import java.io.*;
 import java.nio.file.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-@WebServlet({"/board", "/board/write", "/board/detail",
+@WebServlet({"/board", "/board/write", "/board/detail", "/board/file",
              "/board/edit", "/board/delete",
              "/board/answer", "/board/answer/delete"})
 @MultipartConfig(
@@ -23,6 +25,7 @@ public class BoardServlet extends HttpServlet {
     private static final String[] ALLOWED_CONTENT_TYPES = {
         "image/jpeg", "image/png", "image/gif"
     };
+    private static final String UPLOAD_ROOT_DIR = "jsr-shop-secure-uploads";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -54,18 +57,48 @@ public class BoardServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/board?error=notfound");
                 return;
             }
-            if ("INQUIRY".equals(board.getBoardType())) {
-                if (!isAdmin && board.getUserId() != user.getUserId()) {
-                    response.sendRedirect(request.getContextPath()
-                        + "/board?error=idor&boardId=" + boardId);
-                    return;
-                }
+            if (!canViewBoard(board, user, isAdmin)) {
+                response.sendRedirect(request.getContextPath()
+                    + "/board?error=" + getBoardAccessError(board, isAdmin) + "&boardId=" + boardId);
+                return;
             }
             board.setAnswer(getAnswer(boardId));
             request.setAttribute("jsrBoard", board);
             request.setAttribute("jsrUser", user);
             request.getRequestDispatcher("/WEB-INF/views/board_detail_view.jsp")
                    .forward(request, response);
+
+        } else if (path.equals("/board/file")) {
+            long boardId = Long.parseLong(request.getParameter("boardId"));
+            JsrBoard board = getBoardById(boardId);
+            if (board == null || !hasText(board.getAttachFile())) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+            if (!canViewBoard(board, user, isAdmin)) {
+                response.sendRedirect(request.getContextPath()
+                    + "/board?error=" + getBoardAccessError(board, isAdmin) + "&boardId=" + boardId);
+                return;
+            }
+
+            Path uploadDir = resolveUploadDir();
+            Path filePath = uploadDir.resolve(board.getAttachFile()).normalize();
+            if (!filePath.startsWith(uploadDir) || !Files.exists(filePath)) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            response.setContentType(detectMediaType(filePath));
+            response.setHeader("X-Content-Type-Options", "nosniff");
+            response.setHeader(
+                "Content-Disposition",
+                "attachment; filename=\"attachment" + getExtension(board.getAttachFile()) + "\""
+            );
+            response.setContentLengthLong(Files.size(filePath));
+            try (OutputStream os = response.getOutputStream()) {
+                Files.copy(filePath, os);
+            }
+            return;
 
         } else if (path.equals("/board/edit")) {
             long boardId = Long.parseLong(request.getParameter("boardId"));
@@ -231,31 +264,34 @@ public class BoardServlet extends HttpServlet {
     }
 
     private String handleFileUpload(Part filePart, HttpServletRequest request) throws IOException {
-        String contentType = filePart.getContentType();
+        String originalName = sanitizeOriginalName(extractFileName(filePart));
+        if (!hasText(originalName)) return null;
 
+        String contentType = filePart.getContentType();
         boolean allowed = false;
         for (String ct : ALLOWED_CONTENT_TYPES) {
-            if (ct.equals(contentType)) { allowed = true; break; }
+            if (ct.equalsIgnoreCase(contentType)) {
+                allowed = true;
+                break;
+            }
         }
         if (!allowed) return null;
 
-        String originalName = extractFileName(filePart);
-        if (originalName == null || originalName.isEmpty()) return null;
-
-        String ext = "";
-        int dotIdx = originalName.lastIndexOf(".");
-        if (dotIdx >= 0) ext = originalName.substring(dotIdx).toLowerCase();
+        String ext = getExtension(originalName);
         if (!ext.matches("\\.(jpg|jpeg|png|gif)")) return null;
 
-        String saveFileName = System.currentTimeMillis() + "_" + originalName;
-        String uploadDir = request.getServletContext().getRealPath("/uploads");
-        File dir = new File(uploadDir);
-        if (!dir.exists()) dir.mkdirs();
-
-        Path savePath = Paths.get(uploadDir, saveFileName);
+        byte[] fileBytes;
         try (InputStream is = filePart.getInputStream()) {
-            Files.copy(is, savePath, StandardCopyOption.REPLACE_EXISTING);
+            fileBytes = is.readAllBytes();
         }
+        if (fileBytes.length == 0) return null;
+        if (ImageIO.read(new ByteArrayInputStream(fileBytes)) == null) return null;
+
+        String saveFileName = UUID.randomUUID().toString().replace("-", "") + ext;
+        Path uploadDir = resolveUploadDir();
+        Files.createDirectories(uploadDir);
+        Path savePath = uploadDir.resolve(saveFileName);
+        Files.write(savePath, fileBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
         return saveFileName;
     }
@@ -273,9 +309,32 @@ public class BoardServlet extends HttpServlet {
         return null;
     }
 
+    private String sanitizeOriginalName(String fileName) {
+        if (!hasText(fileName)) return null;
+
+        String normalized = fileName.replace("\\", "/");
+        int slashIdx = normalized.lastIndexOf('/');
+        if (slashIdx >= 0) {
+            normalized = normalized.substring(slashIdx + 1);
+        }
+
+        normalized = normalized.trim();
+        if (!hasText(normalized)) return null;
+        if (!normalized.matches("[A-Za-z0-9._-]{1,100}")) return null;
+        if (normalized.startsWith(".")) return null;
+
+        return normalized;
+    }
+
     private boolean canManageBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
         if (board == null) return false;
         if ("NOTICE".equals(board.getBoardType())) return isAdmin;
+        return isAdmin || board.getUserId() == user.getUserId();
+    }
+
+    private boolean canViewBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
+        if (board == null) return false;
+        if ("NOTICE".equals(board.getBoardType())) return true;
         return isAdmin || board.getUserId() == user.getUserId();
     }
 
@@ -284,6 +343,38 @@ public class BoardServlet extends HttpServlet {
             return "noperm";
         }
         return "idor";
+    }
+
+    private Path resolveUploadDir() {
+        String catalinaBase = System.getProperty("catalina.base");
+        Path basePath = hasText(catalinaBase)
+            ? Paths.get(catalinaBase)
+            : Paths.get(System.getProperty("user.home"));
+        return basePath.resolve(UPLOAD_ROOT_DIR).resolve("board");
+    }
+
+    private String getExtension(String fileName) {
+        if (fileName == null) return "";
+        int dotIdx = fileName.lastIndexOf('.');
+        return dotIdx >= 0 ? fileName.substring(dotIdx).toLowerCase() : "";
+    }
+
+    private String detectMediaType(Path filePath) {
+        String ext = getExtension(filePath.getFileName().toString());
+        switch (ext) {
+            case ".jpg":
+            case ".jpeg":
+                return "image/jpeg";
+            case ".gif":
+                return "image/gif";
+            case ".png":
+            default:
+                return "image/png";
+        }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
     private List<JsrBoard> getNoticeList() {
