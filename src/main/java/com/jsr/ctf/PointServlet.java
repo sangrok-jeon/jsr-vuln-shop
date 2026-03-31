@@ -75,17 +75,7 @@ public class PointServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/point?error=negative");
                 return;
             }
-            if (amount > MAX_CHARGE_ONCE) {
-                response.sendRedirect(request.getContextPath()
-                    + "/point?error=overlimit&limit=" + MAX_CHARGE_ONCE);
-                return;
-            }
-            if (fresh.getPoint() + amount > MAX_POINT_TOTAL) {
-                response.sendRedirect(request.getContextPath()
-                    + "/point?error=maxpoint&max=" + MAX_POINT_TOTAL
-                    + "&current=" + fresh.getPoint());
-                return;
-            }
+
 
             int newPoint = fresh.getPoint() + amount;
             updatePoint(user.getUserId(), newPoint);
