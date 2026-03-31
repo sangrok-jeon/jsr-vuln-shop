@@ -1,10 +1,13 @@
 # 06. Point Charge Security
 
 ## 개요
-포인트 기능에서 확인한 `Business Logic Flaw` 취약점과 그 대응 방향을 정리했다.
+포인트 기능에서 확인한 `Business Logic Flaw` 취약점과 그 대응 방향을 정리한다.
 
-정책상 포인트는 1회 최대 `100,000P`, 최대 보유 `500,000P`로 제한되어야 한다.  
-그러나 서버가 충전 금액과 사용 금액을 충분히 검증하지 않으면, 요청 변조를 통해 정책을 초과한 포인트 충전이 가능하고 음수 포인트 상태까지 발생할 수 있다.
+정상 정책은 다음과 같다.
+- 1회 최대 충전 한도: `100,000P`
+- 최대 보유 포인트 한도: `500,000P`
+
+그러나 서버가 충전 금액과 사용 금액을 충분히 검증하지 않으면 요청 변조를 통해 위 정책을 우회할 수 있다. 그 결과 최대 보유 한도를 초과한 포인트 충전이 가능하고, 보유 포인트보다 많은 금액을 사용해 음수 포인트 상태까지 발생할 수 있다.
 
 ## 진입점
 - `/jsr/point`
@@ -15,19 +18,20 @@
 
 | 구분 | 취약점 | 설명 |
 |------|--------|------|
-| 주요 취약점 | Business Logic Flaw | 서버가 포인트 충전/사용 정책을 최종적으로 검증하지 않아 정책 위반 상태가 발생한다. |
-| 세부 이슈 | Charge Limit Bypass | 1회 최대 충전 한도(`100,000P`)를 초과한 요청이 처리된다. |
-| 세부 이슈 | Maximum Point Balance Bypass | 최대 보유 한도(`500,000P`)를 초과한 상태가 허용된다. |
-| 세부 이슈 | Negative Point Balance | 보유 포인트보다 큰 금액 사용이 가능하여 음수 포인트 상태가 발생한다. |
+| 주요 취약점 | Business Logic Flaw | 포인트 충전 및 사용 정책을 서버가 최종 검증하지 않아 정책 위반 상태가 발생한다. |
+| 관련 이슈 | Charge Limit Bypass | 1회 최대 충전 한도(`100,000P`)를 초과한 요청이 처리된다. |
+| 관련 이슈 | Maximum Point Balance Bypass | 최대 보유 포인트 한도(`500,000P`)를 초과한 상태가 허용된다. |
+| 관련 이슈 | Negative Point Balance | 현재 보유 포인트보다 많은 금액 사용이 가능해 음수 포인트 상태가 발생한다. |
 
 ## 취약한 부분
-포인트 화면에는 `1회 최대 100,000P`, `보유 한도 500,000P` 정책이 표시되어 있고, 충전 입력창에도 `max="100000"`이 적용되어 있다.  
-그러나 서버가 충전 요청과 사용 요청을 최종적으로 검증하지 않으면, 브라우저 UI 제한은 쉽게 우회될 수 있다.
+포인트 페이지에는 `1회 최대 100,000P`, `보유 한도 500,000P` 정책이 안내되고, 충전 입력창에는 브라우저 수준의 제한이 적용되어 있다.
 
-그 결과 다음과 같은 문제가 발생한다.
+하지만 서버가 충전 및 사용 요청을 최종 검증하지 않으면, 사용자는 요청 값을 변조해 정책을 우회할 수 있다. 이 경우 다음 문제가 발생한다.
+
 - 1회 최대 충전 한도 우회
-- 최대 보유 포인트 정책 무력화
-- 보유 포인트보다 큰 금액 사용으로 인한 음수 포인트 발생
+- 최대 보유 포인트 한도 우회
+- 보유 포인트보다 많은 금액 사용
+- 음수 포인트 상태 발생
 
 ## 취약한 코드
 파일: `src/main/java/com/jsr/ctf/PointServlet.java`
@@ -67,47 +71,44 @@ if (path.contains("charge")) {
 ```
 
 ## 취약한 코드 동작 설명
-포인트 충전 화면은 프론트엔드에서 `max="100000"` 속성을 사용해 1회 최대 입력값을 제한하는 것처럼 보인다.  
-또한 화면에는 최대 보유 한도 `500,000P` 정책이 함께 표시된다.
+프론트엔드는 `max="100000"` 속성을 통해 1회 최대 충전 금액을 제한하는 것처럼 보인다. 또한 화면에는 최대 보유 포인트 `500,000P` 정책이 표시된다.
 
-하지만 서버가 충전 금액과 사용 금액을 다시 검증하지 않으면, 요청 변조 시 이 정책은 그대로 무력화된다.  
-충전 로직은 `amount`를 그대로 더하고, 사용 로직은 `amount`를 그대로 차감하기 때문에 다음이 가능하다.
+하지만 서버가 충전 금액과 사용 금액을 다시 검증하지 않으면, 클라이언트가 요청 값을 변조하는 순간 정책은 무력화된다.
 
-- `100,000P` 초과 충전
-- `500,000P` 초과 보유
-- 보유 포인트보다 큰 금액 사용
-- 음수 포인트 상태 발생
+- 충전 로직은 요청의 `amount` 값을 그대로 더한다.
+- 사용 로직은 요청의 `amount` 값을 그대로 차감한다.
+- 그 결과 최대 보유 한도 초과나 음수 포인트 같은 비정상 상태가 발생한다.
 
-즉, 화면에 표시된 정책이 존재하더라도 서버 측 검증이 빠지면 비즈니스 규칙이 보장되지 않는다.
+즉, UI 정책 안내가 존재하더라도 서버 검증이 빠지면 비즈니스 규칙은 보장되지 않는다.
 
 ## 취약한 코드 증적자료
 
 ### 1. 프론트엔드에서 1회 최대 100,000P 제한이 표시됨
-![frontend charge limit warning](images/06-point-charge-security/01-frontend-charge-limit-warning.png)
+![frontend charge limit warning](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/01-frontend-charge-limit-warning.png)
 
 ### 2. Burp를 통해 충전 요청 금액을 초과 값으로 변조
-![point charge tampering request](images/06-point-charge-security/02-point-charge-tampering-request.png)
+![point charge tampering request](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/02-point-charge-tampering-request.png)
 
 ### 3. 변조 요청 이후 최대 한도를 초과한 포인트가 반영됨
-![over limit point charge success](images/06-point-charge-security/03-over-limit-point-charge-success.png)
+![over limit point charge success](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/03-over-limit-point-charge-success.png)
 
 ### 4. 보유 포인트를 초과하는 사용 금액 입력
-![excessive point use input](images/06-point-charge-security/04-excessive-point-use-input.png)
+![excessive point use input](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/04-excessive-point-use-input.png)
 
 ### 5. 포인트 사용 이후 음수 잔액이 발생함
-![negative point balance result](images/06-point-charge-security/05-negative-point-balance-result.png)
+![negative point balance result](C:/Users/user/Documents/Playground/ctf-backend-master-clean/docs/images/06-point-charge-security/05-negative-point-balance-result.png)
 
 ## 영향
 - 포인트 충전 정책 무력화
 - 최대 보유 포인트 정책 무력화
 - 음수 포인트 허용으로 데이터 무결성 훼손
-- 주문/결제 정책과 정산 로직 신뢰성 저하
+- 주문/결제 정책 및 정산 로직 신뢰성 저하
 
 ## 대응 방안
-- 서버에서 1회 최대 충전 한도(`MAX_CHARGE_ONCE`)를 검증
-- 서버에서 최대 보유 포인트(`MAX_POINT_TOTAL`)를 검증
-- 포인트 사용 시 현재 보유 포인트보다 큰 금액은 거부
-- 충전/사용 금액은 `0` 이하를 거부하고, 필요 시 허용 범위를 화이트리스트로 제한
+- 서버에서 1회 최대 충전 한도(`MAX_CHARGE_ONCE`)를 검증한다.
+- 서버에서 최대 보유 포인트(`MAX_POINT_TOTAL`)를 검증한다.
+- 포인트 사용 시 현재 보유 포인트보다 많은 금액은 거부한다.
+- `0` 이하 금액은 충전 및 사용 모두 차단한다.
 
 ## 수정 코드 예시
 파일: `src/main/java/com/jsr/ctf/PointServlet.java`
@@ -156,17 +157,17 @@ if (path.contains("charge")) {
 ```
 
 ## 대응 코드 동작 설명
-수정 후에는 프론트엔드 제한과 별개로 서버가 최종적으로 충전/사용 정책을 검증한다.
+수정 이후에는 브라우저의 입력 제한과 별개로 서버가 충전 및 사용 정책을 최종 검증한다.
 
-- 충전 시 `MAX_CHARGE_ONCE`를 초과하면 거부
-- 충전 후 보유 포인트가 `MAX_POINT_TOTAL`을 초과하면 거부
-- 사용 시 현재 보유 포인트보다 큰 금액이면 거부
+- 1회 최대 충전 한도를 초과하면 차단
+- 최대 보유 포인트를 초과하면 차단
+- 현재 보유 포인트보다 큰 사용 금액은 차단
 
-이렇게 하면 브라우저 UI 제한을 우회하더라도 서버가 정책 위반 요청을 차단할 수 있다.
+이렇게 하면 프론트엔드 제한을 우회하더라도 서버에서 정책 위반 요청을 막을 수 있다.
 
 ## 대응 증적자료
-대응 코드 적용 후에는 아래 항목을 추가로 확인할 수 있다.
+대응 코드 적용 후에는 다음 흐름을 추가로 확인할 수 있다.
 
 - 1회 최대 충전 한도 초과 요청 차단
 - 최대 보유 포인트 초과 요청 차단
-- 보유 포인트 초과 사용 요청 차단
+- 현재 보유 포인트 초과 사용 요청 차단
