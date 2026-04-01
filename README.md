@@ -30,3 +30,4 @@
 | 7 | Order Security | Price Tampering, Business Logic Flaw | `/jsr/product/detail`, `/jsr/order`, `/jsr/order/proc` | [`docs/07-order-security.md`](docs/07-order-security.md) |
 | 8 | Stored XSS Security | Stored XSS, Test Cookie Exposure (Local Test Only) | `/jsr/login`, `/jsr/product/detail`, `/jsr/product/review` | [`docs/08-stored-xss-security.md`](docs/08-stored-xss-security.md) |
 | 9 | Order IDOR Security | Broken Access Control, IDOR | `/jsr/order/list`, `/jsr/order/detail` | [`docs/09-order-idor-security.md`](docs/09-order-idor-security.md) |
+| 10 | Admin CSRF Security | CSRF, HTML Link Injection | `/jsr/board?tab=INQUIRY`, `/jsr/board/detail`, `/jsr/point/use` | [`docs/10-admin-csrf-security.md`](docs/10-admin-csrf-security.md) |
