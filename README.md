@@ -28,3 +28,4 @@
 | 5 | File Upload Security | Insecure File Upload, Web-Accessible Upload, Web Shell Upload | `/jsr/board/write`, `/jsr/uploads/*` | [`docs/05-file-upload-security.md`](docs/05-file-upload-security.md) |
 | 6 | Point Charge Security | Business Logic Flaw, Charge Limit Bypass, Negative Point Balance | `/jsr/point`, `/jsr/point/charge`, `/jsr/point/use` | [`docs/06-point-charge-security.md`](docs/06-point-charge-security.md) |
 | 7 | Order Security | Price Tampering, Business Logic Flaw | `/jsr/product/detail`, `/jsr/order`, `/jsr/order/proc` | [`docs/07-order-security.md`](docs/07-order-security.md) |
+| 8 | Stored XSS Security | Stored XSS, Test Cookie Exposure (Local Test Only) | `/jsr/login`, `/jsr/product/detail`, `/jsr/product/review` | [`docs/08-stored-xss-security.md`](docs/08-stored-xss-security.md) |

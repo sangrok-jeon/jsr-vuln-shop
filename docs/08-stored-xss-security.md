@@ -138,12 +138,4 @@ if ("ADMIN".equals(loginUser.getRole())) {
 또한 로그인 시 영향 시연용으로 임시 추가했던 테스트용 쿠키 발급 코드를 제거하면, XSS가 실행되더라도 브라우저에서 읽을 수 있는 추가 쿠키가 남지 않는다. 이후에는 컨테이너가 관리하는 세션 쿠키 정책만 유지되므로 불필요한 노출 지점이 줄어든다.
 
 ## 대응 증적자료
-
-### 6. 동일한 스크립트 입력이 문자열로 표시되는 화면
-![escaped review input fixed](images/08-stored-xss-security/06-escaped-review-input-fixed.png)
-
-### 7. 상품 상세 페이지에서 스크립트가 실행되지 않고 문자열로 출력됨
-![escaped review rendered fixed](images/08-stored-xss-security/07-escaped-review-rendered-fixed.png)
-
-### 8. 다른 계정으로 조회해도 더 이상 스크립트가 실행되지 않음
-![stored xss blocked on revisit](images/08-stored-xss-security/08-stored-xss-blocked-on-revisit.png)
+patched 기준 대응 증적은 추후 추가 예정이다.
