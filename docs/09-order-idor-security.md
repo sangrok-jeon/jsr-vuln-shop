@@ -107,11 +107,11 @@
 
 ## 대응 코드 증적자료
 
-### 5. test002 계정에서 자신의 주문 상세는 정상 조회 가능
-![test002 own order detail fixed](images/09-order-idor-security/06-test002-own-order-detail-fixed.png)
-
-### 6. Burp에서 자신의 주문 상세 요청을 가로채 `orderId`를 63에서 41로 수정하여 전송
+### 5. Burp에서 자신의 주문 상세 요청을 가로채 `orderId`를 63에서 41로 수정하여 전송
 ![order detail idor attempt burp](images/09-order-idor-security/07-order-detail-idor-attempt-burp.png)
+
+### 6. test002 계정에서 자신의 주문 상세는 정상 조회 가능
+![test002 own order detail fixed](images/09-order-idor-security/06-test002-own-order-detail-fixed.png)
 
 ### 7. 타인 주문 상세 접근이 차단되고 주문 목록으로 리다이렉트됨
 ![order detail idor blocked result](images/09-order-idor-security/08-order-detail-idor-blocked-result.png)
