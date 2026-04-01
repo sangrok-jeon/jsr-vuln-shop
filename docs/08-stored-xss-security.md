@@ -138,4 +138,19 @@ if ("ADMIN".equals(loginUser.getRole())) {
 또한 로그인 시 영향 시연용으로 임시 추가했던 테스트용 쿠키 발급 코드를 제거하면, XSS가 실행되더라도 브라우저에서 읽을 수 있는 추가 쿠키가 남지 않는다. 이후에는 컨테이너가 관리하는 세션 쿠키 정책만 유지되므로 불필요한 노출 지점이 줄어든다.
 
 ## 대응 증적자료
-patched 기준 대응 증적은 추후 추가 예정이다.
+### 1. `alert` 기반 XSS 페이로드 입력 시도
+![alert payload input fixed](images/08-stored-xss-security/06-alert-payload-input-fixed.png)
+
+### 2. 입력한 스크립트가 실행되지 않고 문자열 그대로 저장됨
+![alert payload rendered as text](images/08-stored-xss-security/07-alert-payload-rendered-as-text.png)
+
+### 3. 외부 요청 전송용 페이로드 입력 시도
+![cookie payload input fixed](images/08-stored-xss-security/08-cookie-payload-input-fixed.png)
+
+### 4. 외부 요청 전송용 페이로드도 문자열 그대로 출력됨
+![cookie payload rendered as text](images/08-stored-xss-security/09-cookie-payload-rendered-as-text.png)
+
+### 5. 외부 수신 대기 서버에 추가 요청이 도달하지 않음
+![no external request received](images/08-stored-xss-security/10-no-external-request-received.png)
+
+즉 대응 이후에는 리뷰에 입력된 `<script>`가 더 이상 브라우저에서 실행되지 않고, 상품 상세 페이지에는 문자열 그대로만 출력된다. 따라서 `alert` 실행도 발생하지 않으며, 외부 수신 서버로의 추가 요청 전송도 확인되지 않는다.
