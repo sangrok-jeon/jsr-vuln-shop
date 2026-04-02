@@ -40,6 +40,16 @@
     }
     .empty-state .e-icon { font-size:48px; margin-bottom:12px; }
     .empty-state .e-text { font-size:15px; margin-bottom:16px; }
+    .notice-error {
+        margin: 0 0 20px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(239,68,68,0.35);
+        background: rgba(127,29,29,0.22);
+        color: #fecaca;
+        font-size: 14px;
+        line-height: 1.5;
+    }
     </style>
 </head>
 <body>
@@ -48,6 +58,11 @@
     <div class="list-header">
         <h2>주문 내역</h2>
     </div>
+    <c:if test="${param.error eq 'idor'}">
+        <div class="notice-error">
+            다른 사용자의 주문 상세에는 접근할 수 없습니다.
+        </div>
+    </c:if>
 <c:choose>
     <c:when test="${empty jsrOrders}">
         <div class="empty-state">

@@ -1,5 +1,65 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page import="com.jsr.ctf.JsrBoard,java.util.regex.Matcher,java.util.regex.Pattern" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%!
+    private static final Pattern SAFE_URL_PATTERN = Pattern.compile("(https?://[\\w\\-./?%&=+#:~]+)");
+
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        String escaped = value;
+        escaped = escaped.replace("&", "&amp;");
+        escaped = escaped.replace("<", "&lt;");
+        escaped = escaped.replace(">", "&gt;");
+        escaped = escaped.replace("\"", "&quot;");
+        escaped = escaped.replace("'", "&#39;");
+        return escaped;
+    }
+
+    private String renderSafeTextWithLinks(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        String[] lines = value.split("\\r\\n|\\n|\\r", -1);
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            String renderedLine;
+
+            // If the original line looks like HTML markup, escape it but do not auto-link URLs inside it.
+            if (line.contains("<") || line.contains(">")) {
+                renderedLine = escapeHtml(line);
+            } else {
+                String escaped = escapeHtml(line);
+                Matcher matcher = SAFE_URL_PATTERN.matcher(escaped);
+                StringBuffer buffer = new StringBuffer();
+
+                while (matcher.find()) {
+                    String url = matcher.group(1);
+                    String link = "<a href=\"" + url
+                        + "\" target=\"_blank\" rel=\"noopener noreferrer\">"
+                        + url + "</a>";
+                    matcher.appendReplacement(buffer, Matcher.quoteReplacement(link));
+                }
+                matcher.appendTail(buffer);
+                renderedLine = buffer.toString();
+            }
+
+            if (i > 0) {
+                result.append("<br>");
+            }
+            result.append(renderedLine);
+        }
+
+        return result.toString();
+    }
+%>
+<%
+    JsrBoard boardDetail = (JsrBoard) request.getAttribute("jsrBoard");
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -64,7 +124,7 @@
                     <span>${jsrBoard.createdAt}</span>
                 </div>
             </div>
-            <div class="post-body">${jsrBoard.content}</div>
+            <div class="post-body"><%= renderSafeTextWithLinks(boardDetail != null ? boardDetail.getContent() : null) %></div>
 
             <c:if test="${not empty jsrBoard.attachFile}">
                 <div class="attach-box">
@@ -112,7 +172,7 @@
                                    style="font-size:11px;padding:3px 8px">삭제</a>
                             </c:if>
                         </div>
-                        <div class="answer-body">${jsrBoard.answer.content}</div>
+                        <div class="answer-body"><%= renderSafeTextWithLinks(boardDetail != null && boardDetail.getAnswer() != null ? boardDetail.getAnswer().getContent() : null) %></div>
                     </div>
 
                     <c:if test="${_isAdmin}">

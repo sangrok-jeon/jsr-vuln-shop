@@ -65,6 +65,7 @@
     /* 알림 */
     .alert { padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:20px; }
     .alert-success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:#86efac; }
+    .alert-error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; }
 
     /* 포인트 카드 */
     .point-card {
@@ -132,6 +133,12 @@
     <% if ("1".equals(request.getParameter("pwChanged"))) { %>
     <div class="alert alert-success">비밀번호가 변경되었습니다.</div>
     <% } %>
+    <% if ("current".equals(request.getParameter("pwError"))) { %>
+    <div class="alert alert-error">현재 비밀번호가 올바르지 않습니다.</div>
+    <% } %>
+    <% if ("mismatch".equals(request.getParameter("pwError"))) { %>
+    <div class="alert alert-error">새 비밀번호와 비밀번호 확인이 일치하지 않습니다.</div>
+    <% } %>
 <%-- 포인트 카드 --%>
     <div class="point-card">
         <div>
@@ -171,8 +178,12 @@
             <h3>비밀번호 변경</h3>
 <form method="post" action="<%= request.getContextPath() %>/mypage/pw_change">
                 <div class="form-field">
-                    <label>새 비밀번호 
-</label>
+                    <label>현재 비밀번호</label>
+                    <input type="password" name="currentPassword" class="jsr-input"
+                           placeholder="현재 비밀번호 입력">
+                </div>
+                <div class="form-field">
+                    <label>새 비밀번호</label>
                     <input type="password" name="password" class="jsr-input"
                            placeholder="새 비밀번호 입력">
                 </div>

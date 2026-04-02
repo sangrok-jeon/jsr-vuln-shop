@@ -222,11 +222,11 @@
 
         <c:forEach var="r" items="${jsrReviews}">
         <div class="jsr-review">
-            <b>${r.username}</b>
+            <b><c:out value="${r.username}" /></b>
             <c:forEach begin="1" end="${r.rating}">⭐</c:forEach>
-            <span class="jsr-date">${r.createdAt}</span>
+            <span class="jsr-date"><c:out value="${r.createdAt}" /></span>
             <br>
-<p>${r.content}</p>
+<p><c:out value="${r.content}" /></p>
         </div>
         </c:forEach>
 

@@ -2,19 +2,23 @@ package com.jsr.ctf;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @WebServlet({"/point", "/point/charge", "/point/use"})
 public class PointServlet extends HttpServlet {
 
-    // ── 정상 제한값 (서버사이드 검증) ──────────────────────────
-    // ⚠️ CTF 취약점: Burp Suite로 amount 파라미터 변조 시 아래 검증 우회 가능
-    private static final int MAX_CHARGE_ONCE = 100_000;   // 1회 최대 충전 10만P
-    private static final int MAX_POINT_TOTAL = 500_000;   // 최대 보유 50만P
+    private static final int MAX_CHARGE_ONCE = 100_000;
+    private static final int MAX_POINT_TOTAL = 500_000;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -26,13 +30,17 @@ public class PointServlet extends HttpServlet {
             return;
         }
 
+        if (request.getSession().getAttribute("csrfToken") == null) {
+            request.getSession().setAttribute("csrfToken", UUID.randomUUID().toString());
+        }
+
         JsrUser fresh = getUserById(user.getUserId());
         List<JsrPointHistory> history = getHistory(user.getUserId());
 
-        request.setAttribute("jsrUser",         fresh);
-        request.setAttribute("jsrHistory",       history);
+        request.setAttribute("jsrUser", fresh);
+        request.setAttribute("jsrHistory", history);
         request.setAttribute("jsrMaxChargeOnce", MAX_CHARGE_ONCE);
-        request.setAttribute("jsrMaxTotal",      MAX_POINT_TOTAL);
+        request.setAttribute("jsrMaxTotal", MAX_POINT_TOTAL);
         request.getRequestDispatcher("/WEB-INF/views/point_view.jsp")
                .forward(request, response);
     }
@@ -47,14 +55,21 @@ public class PointServlet extends HttpServlet {
             return;
         }
 
-        String path      = request.getServletPath();
+        String csrfToken = request.getParameter("csrfToken");
+        String sessionToken = (String) request.getSession().getAttribute("csrfToken");
+        if (sessionToken == null || csrfToken == null || !sessionToken.equals(csrfToken)) {
+            response.sendRedirect(request.getContextPath() + "/point?error=csrf");
+            return;
+        }
+
+        String path = request.getServletPath();
         String amountStr = request.getParameter("amount");
 
-        // ── 빈값 / 형식 오류 방어 (500 에러 방지) ──────────────
         if (amountStr == null || amountStr.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/point?error=empty");
             return;
         }
+
         int amount;
         try {
             amount = Integer.parseInt(amountStr.trim());
@@ -70,19 +85,15 @@ public class PointServlet extends HttpServlet {
         }
 
         if (path.contains("charge")) {
-            // ── 충전 ──────────────────────────────────────────
-            // 검증 1: 0 이하 차단
             if (amount <= 0) {
                 response.sendRedirect(request.getContextPath() + "/point?error=negative");
                 return;
             }
-            // 검증 2: 1회 한도 초과 차단  ← ⚠️ Burp로 amount 변조 시 우회 가능
             if (amount > MAX_CHARGE_ONCE) {
                 response.sendRedirect(request.getContextPath()
                     + "/point?error=overlimit&limit=" + MAX_CHARGE_ONCE);
                 return;
             }
-            // 검증 3: 최대 보유 초과 차단  ← ⚠️ 마찬가지로 우회 가능
             if (fresh.getPoint() + amount > MAX_POINT_TOTAL) {
                 response.sendRedirect(request.getContextPath()
                     + "/point?error=maxpoint&max=" + MAX_POINT_TOTAL
@@ -98,12 +109,16 @@ public class PointServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/point?charged=1");
 
         } else if (path.contains("use")) {
-            // ── 사용 ──────────────────────────────────────────
             if (amount <= 0) {
                 response.sendRedirect(request.getContextPath() + "/point?error=negative");
                 return;
             }
-            // ⚠️ 의도적 취약점: 잔액 초과 사용 허용 → 음수 포인트 가능
+            if (amount > fresh.getPoint()) {
+                response.sendRedirect(request.getContextPath()
+                    + "/point?error=notenough&current=" + fresh.getPoint());
+                return;
+            }
+
             int newPoint = fresh.getPoint() - amount;
             updatePoint(user.getUserId(), newPoint);
             saveHistory(user.getUserId(), "USE", amount, newPoint, "포인트 사용");
@@ -113,10 +128,10 @@ public class PointServlet extends HttpServlet {
         }
     }
 
-    // ── DB 헬퍼 ────────────────────────────────────────────────
-
     private JsrUser getUserById(long userId) {
-        Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement("SELECT * FROM JSR_USERS WHERE USER_ID=?");
@@ -133,26 +148,33 @@ public class PointServlet extends HttpServlet {
                 u.setPhone(rs.getString("PHONE"));
                 return u;
             }
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(rs, ps, conn); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, ps, conn);
+        }
         return null;
     }
 
     private void updatePoint(long userId, int point) {
-        Connection conn = null; PreparedStatement ps = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement("UPDATE JSR_USERS SET POINT=? WHERE USER_ID=?");
             ps.setInt(1, point);
             ps.setLong(2, userId);
             ps.executeUpdate();
-            
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(ps, conn); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(ps, conn);
+        }
     }
 
     private void saveHistory(long userId, String type, int amount, int balanceAfter, String desc) {
-        Connection conn = null; PreparedStatement ps = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement(
@@ -165,14 +187,18 @@ public class PointServlet extends HttpServlet {
             ps.setInt(4, balanceAfter);
             ps.setString(5, desc);
             ps.executeUpdate();
-            
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(ps, conn); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(ps, conn);
+        }
     }
 
     private List<JsrPointHistory> getHistory(long userId) {
         List<JsrPointHistory> list = new ArrayList<>();
-        Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement(
@@ -189,8 +215,11 @@ public class PointServlet extends HttpServlet {
                 h.setCreatedAt(rs.getString("CREATED_AT"));
                 list.add(h);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(rs, ps, conn); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, ps, conn);
+        }
         return list;
     }
 }

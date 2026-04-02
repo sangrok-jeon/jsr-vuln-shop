@@ -2,9 +2,14 @@ package com.jsr.ctf;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +30,12 @@ public class OrderServlet extends HttpServlet {
 
         if (path.equals("/order/complete")) {
             long orderId = Long.parseLong(request.getParameter("orderId"));
-            request.setAttribute("jsrOrder", getOrderById(orderId));
+            JsrOrder order = getOrderById(orderId);
+            if (!canAccessOrder(user, order)) {
+                response.sendRedirect(request.getContextPath() + "/order/list?error=idor&orderId=" + orderId);
+                return;
+            }
+            request.setAttribute("jsrOrder", order);
             request.getRequestDispatcher("/WEB-INF/views/order_complete_view.jsp")
                    .forward(request, response);
 
@@ -35,19 +45,22 @@ public class OrderServlet extends HttpServlet {
                    .forward(request, response);
 
         } else if (path.equals("/order/detail")) {
-            // ⚠️ IDOR: 소유자 검증 없음 → orderId 변조로 타인 주문 조회 가능
             long orderId = Long.parseLong(request.getParameter("orderId"));
-            request.setAttribute("jsrOrder", getOrderById(orderId));
+            JsrOrder order = getOrderById(orderId);
+            if (!canAccessOrder(user, order)) {
+                response.sendRedirect(request.getContextPath() + "/order/list?error=idor&orderId=" + orderId);
+                return;
+            }
+            request.setAttribute("jsrOrder", order);
             request.getRequestDispatcher("/WEB-INF/views/order_detail_view.jsp")
                    .forward(request, response);
 
         } else {
-            // /order - 주문 폼
             String productIdStr = request.getParameter("productId");
-            String qtyStr       = request.getParameter("quantity");
+            String qtyStr = request.getParameter("quantity");
             if (productIdStr != null) {
                 long productId = Long.parseLong(productIdStr);
-                int  quantity  = qtyStr != null ? Integer.parseInt(qtyStr) : 1;
+                int quantity = qtyStr != null ? Integer.parseInt(qtyStr) : 1;
                 JsrProduct product = getProductById(productId);
                 request.setAttribute("jsrProduct", product);
                 request.setAttribute("jsrQty", quantity);
@@ -78,34 +91,36 @@ public class OrderServlet extends HttpServlet {
             return;
         }
 
-        long   productId  = Long.parseLong(request.getParameter("productId"));
-        int    quantity   = Integer.parseInt(request.getParameter("quantity"));
-        int    price      = Integer.parseInt(request.getParameter("price"));       // ⚠️ 가격 변조 취약점
-        int    totalPrice = Integer.parseInt(request.getParameter("totalPrice"));  // ⚠️ 검증 없음
-        String address    = request.getParameter("address");
-        if (address == null || address.isEmpty()) address = user.getAddress();
+        long productId = Long.parseLong(request.getParameter("productId"));
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        String address = request.getParameter("address");
+        if (address == null || address.isEmpty()) {
+            address = user.getAddress();
+        }
 
         JsrProduct product = getProductById(productId);
+        if (product == null || quantity <= 0) {
+            response.sendRedirect(request.getContextPath() + "/products");
+            return;
+        }
 
-        // ── 포인트 잔액 체크 ──────────────────────────
-        // DB에서 현재 포인트 재조회 (세션값 신뢰 X)
+        int serverPrice = product.getPrice();
+        int serverTotal;
+        try {
+            serverTotal = Math.multiplyExact(serverPrice, quantity);
+        } catch (ArithmeticException e) {
+            response.sendRedirect(request.getContextPath() + "/products");
+            return;
+        }
+
         int currentPoint = getUserPoint(user.getUserId());
 
-        if (currentPoint < totalPrice) {
-            // ⚠️ 포인트 부족 → 결제 불가
-            // totalPrice는 클라이언트 전송값(변조 가능) 그대로 비교 → 가격 변조 시 통과 가능
-            if (productId > 0) {
-                request.setAttribute("jsrProduct", product);
-                request.setAttribute("jsrQty", quantity);
-                request.setAttribute("jsrOrderTotal", totalPrice);
-            } else {
-                List<JsrCartItem> cart = getCart(user.getUserId());
-                request.setAttribute("jsrCartItems", cart);
-                request.setAttribute("jsrCartTotal", totalPrice);
-                request.setAttribute("jsrOrderTotal", totalPrice);
-            }
+        if (currentPoint < serverTotal) {
+            request.setAttribute("jsrProduct", product);
+            request.setAttribute("jsrQty", quantity);
+            request.setAttribute("jsrOrderTotal", serverTotal);
             request.setAttribute("jsrCurrentPoint", currentPoint);
-            request.setAttribute("jsrShortfall", totalPrice - currentPoint);
+            request.setAttribute("jsrShortfall", serverTotal - currentPoint);
             request.setAttribute("jsrUser", user);
             request.setAttribute("errorMsg", "포인트가 부족합니다.");
             request.getRequestDispatcher("/WEB-INF/views/order_view.jsp")
@@ -113,7 +128,6 @@ public class OrderServlet extends HttpServlet {
             return;
         }
 
-        // ── 결제 처리 ──────────────────────────────────
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -121,7 +135,6 @@ public class OrderServlet extends HttpServlet {
         try {
             conn = DBUtil.getConnection();
 
-            // 1. 주문 INSERT (⚠️ price/totalPrice = 클라이언트 값 그대로)
             ps = conn.prepareStatement(
                 "INSERT INTO JSR_ORDERS " +
                 "(ORDER_ID,USER_ID,USERNAME,PRODUCT_ID,PRODUCT_NAME,QUANTITY,PRICE,TOTAL_PRICE,STATUS,ADDRESS,CREATED_AT) " +
@@ -130,43 +143,40 @@ public class OrderServlet extends HttpServlet {
             ps.setLong(1, user.getUserId());
             ps.setString(2, user.getUsername());
             ps.setLong(3, productId);
-            ps.setString(4, product != null ? product.getName() : "");
+            ps.setString(4, product.getName());
             ps.setInt(5, quantity);
-            ps.setInt(6, price);
-            ps.setInt(7, totalPrice);
+            ps.setInt(6, serverPrice);
+            ps.setInt(7, serverTotal);
             ps.setString(8, address);
             ps.executeUpdate();
-            rs = ps.getGeneratedKeys();
-            if (rs.next()) orderId = rs.getLong(1);
 
-            // 2. 포인트 차감 (⚠️ 변조된 totalPrice만큼만 차감 → 가격 변조 시 이득)
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                orderId = rs.getLong(1);
+            }
+
             DBUtil.close(rs, ps);
             ps = conn.prepareStatement(
                 "UPDATE JSR_USERS SET POINT = POINT - ? WHERE USER_ID = ?");
-            ps.setInt(1, totalPrice);
+            ps.setInt(1, serverTotal);
             ps.setLong(2, user.getUserId());
             ps.executeUpdate();
 
-            // 3. 포인트 이력
             DBUtil.close(ps);
             ps = conn.prepareStatement(
                 "INSERT INTO JSR_POINT_HISTORY(HISTORY_ID,USER_ID,AMOUNT,DESCRIPTION,CREATED_AT) " +
                 "VALUES(JSR_POINT_SEQ.NEXTVAL,?,?,'주문결제(ORDER_ID:'||?||')',SYSDATE)");
             ps.setLong(1, user.getUserId());
-            ps.setInt(2, -totalPrice);
+            ps.setInt(2, -serverTotal);
             ps.setLong(3, orderId);
             ps.executeUpdate();
 
-            // 4. 장바구니 비우기
             DBUtil.close(ps);
             ps = conn.prepareStatement("DELETE FROM JSR_CART WHERE USER_ID=?");
             ps.setLong(1, user.getUserId());
             ps.executeUpdate();
 
-
-
-            // 세션 포인트 업데이트
-            user.setPoint(currentPoint - totalPrice);
+            user.setPoint(currentPoint - serverTotal);
             request.getSession().setAttribute("jsrUser", user);
 
         } catch (SQLException e) {
@@ -178,41 +188,64 @@ public class OrderServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/order/complete?orderId=" + orderId);
     }
 
-    // ── DB 헬퍼 ────────────────────────────────────────────────
-
     private int getUserPoint(long userId) {
-        Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement("SELECT POINT FROM JSR_USERS WHERE USER_ID=?");
             ps.setLong(1, userId);
             rs = ps.executeQuery();
-            if (rs.next()) return rs.getInt("POINT");
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(rs, ps, conn); }
+            if (rs.next()) {
+                return rs.getInt("POINT");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, ps, conn);
+        }
         return 0;
     }
 
     private JsrOrder getOrderById(long orderId) {
-        Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
-            // ⚠️ IDOR: WHERE USER_ID 조건 없음
             ps = conn.prepareStatement(
                 "SELECT o.*, p.IMAGE_URL FROM JSR_ORDERS o " +
                 "LEFT JOIN JSR_PRODUCTS p ON o.PRODUCT_ID = p.PRODUCT_ID " +
                 "WHERE o.ORDER_ID=?");
             ps.setLong(1, orderId);
             rs = ps.executeQuery();
-            if (rs.next()) return mapOrder(rs);
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(rs, ps, conn); }
+            if (rs.next()) {
+                return mapOrder(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, ps, conn);
+        }
         return null;
+    }
+
+    private boolean canAccessOrder(JsrUser user, JsrOrder order) {
+        if (user == null || order == null) {
+            return false;
+        }
+        if (order.getUserId() == user.getUserId()) {
+            return true;
+        }
+        return "ADMIN".equalsIgnoreCase(user.getRole());
     }
 
     private List<JsrOrder> getOrdersByUser(long userId) {
         List<JsrOrder> list = new ArrayList<>();
-        Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement(
@@ -221,14 +254,21 @@ public class OrderServlet extends HttpServlet {
                 "WHERE o.USER_ID=? ORDER BY o.ORDER_ID DESC");
             ps.setLong(1, userId);
             rs = ps.executeQuery();
-            while (rs.next()) list.add(mapOrder(rs));
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(rs, ps, conn); }
+            while (rs.next()) {
+                list.add(mapOrder(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, ps, conn);
+        }
         return list;
     }
 
     private JsrProduct getProductById(long productId) {
-        Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement("SELECT * FROM JSR_PRODUCTS WHERE PRODUCT_ID=?");
@@ -245,14 +285,19 @@ public class OrderServlet extends HttpServlet {
                 p.setImageUrl(rs.getString("IMAGE_URL"));
                 return p;
             }
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(rs, ps, conn); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, ps, conn);
+        }
         return null;
     }
 
     private List<JsrCartItem> getCart(long userId) {
         List<JsrCartItem> list = new ArrayList<>();
-        Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
             ps = conn.prepareStatement(
@@ -271,8 +316,11 @@ public class OrderServlet extends HttpServlet {
                 item.setImageUrl(rs.getString("IMAGE_URL"));
                 list.add(item);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
-        finally { DBUtil.close(rs, ps, conn); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, ps, conn);
+        }
         return list;
     }
 
@@ -289,7 +337,10 @@ public class OrderServlet extends HttpServlet {
         o.setStatus(rs.getString("STATUS"));
         o.setAddress(rs.getString("ADDRESS"));
         o.setCreatedAt(rs.getString("CREATED_AT"));
-        try { o.setImageUrl(rs.getString("IMAGE_URL")); } catch (SQLException ignored) {}
+        try {
+            o.setImageUrl(rs.getString("IMAGE_URL"));
+        } catch (SQLException ignored) {
+        }
         return o;
     }
 }

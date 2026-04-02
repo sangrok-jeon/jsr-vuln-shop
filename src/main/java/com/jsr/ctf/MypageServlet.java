@@ -53,7 +53,22 @@ public class MypageServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/mypage?updated=1");
 
         } else if (path.equals("/mypage/pw_change")) {
+            String currentPassword = request.getParameter("currentPassword");
             String newPassword = request.getParameter("password");
+            String confirmPassword = request.getParameter("password2");
+            JsrUser fresh = getUserById(user.getUserId());
+
+            if (fresh == null || currentPassword == null
+                    || !PasswordUtil.matches(currentPassword, fresh.getPassword())) {
+                response.sendRedirect(request.getContextPath() + "/mypage?pwError=current");
+                return;
+            }
+            if (newPassword == null || newPassword.trim().isEmpty()
+                    || !newPassword.equals(confirmPassword)) {
+                response.sendRedirect(request.getContextPath() + "/mypage?pwError=mismatch");
+                return;
+            }
+
             updatePassword(user.getUserId(), newPassword);
             response.sendRedirect(request.getContextPath() + "/mypage?pwChanged=1");
         }
@@ -72,6 +87,7 @@ public class MypageServlet extends HttpServlet {
                 JsrUser u = new JsrUser();
                 u.setUserId(rs.getLong("USER_ID"));
                 u.setUsername(rs.getString("USERNAME"));
+                u.setPassword(rs.getString("PASSWORD"));
                 u.setEmail(rs.getString("EMAIL"));
                 u.setRole(rs.getString("ROLE"));
                 u.setPoint(rs.getInt("POINT"));
