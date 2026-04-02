@@ -38,10 +38,10 @@ ps.setLong(1, productId);
 
 ## 취약한 코드 증적자료
 1. 정상적인 `productId=1` 요청에서는 상품 상세 페이지가 정상적으로 조회된다.  
-   ![01-normal-product-detail](images/12-information-exposure-security/01-normal-product-detail.png)
+   ![01-normal-product-detail](images/12-information-exposure-security/02-invalid-product-id-error-disclosure.png)
 
 2. `productId=abc`처럼 숫자가 아닌 값을 전달하면 500 오류와 함께 `NumberFormatException`, 클래스명, 줄번호가 그대로 노출된다.  
-   ![02-invalid-product-id-error-disclosure](images/12-information-exposure-security/02-invalid-product-id-error-disclosure.png)
+   ![02-invalid-product-id-error-disclosure](images/12-information-exposure-security/01-normal-product-detail.png)
 
 ## 영향
 - 내부 클래스명, 메서드명, 줄번호 같은 구현 정보가 외부에 노출된다.
