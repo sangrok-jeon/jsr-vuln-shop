@@ -134,6 +134,11 @@ private String filterSqli(String input) {
 - 사용자 비밀번호를 로그에 출력하지 않기
 - 운영 환경에서 디버그 로그 최소화
 
+### 3. 추가 권장 대응
+
+- 로그인 실패 횟수 기반의 레이트 리밋 또는 계정 잠금 정책을 적용한다.
+- 무차별 대입 시도가 반복되는 경우 CAPTCHA, 지연 응답, 추가 인증 수단을 함께 검토한다.
+
 ## 수정 코드 예시
 
 파일: [`patched/src/main/java/com/jsr/ctf/LoginServlet.java`](https://github.com/sangrok-jeon/jsr-vuln-shop/blob/patched/src/main/java/com/jsr/ctf/LoginServlet.java)
@@ -164,6 +169,8 @@ if (rs.next() && PasswordUtil.matches(password, rs.getString("PASSWORD"))) {
 대응 코드에서는 사용자 입력을 SQL 문자열에 직접 연결하지 않고, `USERNAME`만 바인딩 값으로 조회한다. 따라서 `test001'or'1'='1` 같은 입력은 SQL 구문이 아니라 하나의 문자열 값으로 처리되어 인증 우회가 발생하지 않는다.
 
 현재 `patched` 브랜치 예시에는 `PasswordUtil.matches()`가 포함되어 있지만, 이는 비밀번호 저장 방식에 맞춘 검증 로직이다. 로그인 SQL Injection 자체를 막는 핵심은 문자열 결합 SQL을 제거하고 `PreparedStatement`로 입력값을 바인딩하는 구조로 바꾸는 데 있다.
+
+또한 본 문서의 대응은 SQL Injection과 민감 로그 출력 제거에 초점을 맞춘 것이며, 별도의 로그인 시도 제한이나 계정 잠금 정책은 추가 권장 대응으로 남아 있다.
 
 ## 대응 후 증적자료
 

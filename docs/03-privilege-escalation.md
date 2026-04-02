@@ -115,6 +115,7 @@ private boolean checkLogin(HttpServletRequest request, HttpServletResponse respo
 - 수정 대상 사용자 정보는 세션의 `jsrUser` 기준으로만 처리하기
 - 관리자 기능 진입 시 세션의 `ROLE` 값을 서버에서 다시 검증하기
 - hidden field 값을 신뢰하지 않기
+- 로그인 성공 또는 민감한 권한 변경 이후에는 세션을 재발급해 세션 고정 공격 가능성을 줄이기
 
 ## 수정 코드 예시
 
@@ -167,6 +168,8 @@ private boolean checkAdmin(HttpServletRequest request, HttpServletResponse respo
 - 대응 코드에서는 권한 관련 값인 `role`, `userId`를 클라이언트 요청에서 더 이상 받지 않는다.
 - 마이페이지 수정은 현재 로그인한 세션 사용자 ID만 사용하므로 Burp Suite로 `role=ADMIN`을 추가하거나 변조해도 권한 변경에 사용되지 않는다.
 - 관리자 페이지는 세션의 실제 권한이 `ADMIN`인지 서버에서 다시 검증하므로, 일반 사용자 세션으로는 `/admin/dashboard`에 직접 접근할 수 없다.
+
+본 문서의 대응은 권한 파라미터 제거와 서버 측 역할 재검증에 초점을 맞추고 있다. 추가적으로 로그인 직후 또는 권한 변경 직후 세션을 재발급하면 세션 고정 공격에 대한 방어 수준을 더 높일 수 있다.
 
 ## 대응 후 증적자료
 

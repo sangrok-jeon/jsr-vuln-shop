@@ -126,6 +126,7 @@ private String handleFileUpload(Part filePart, HttpServletRequest request) throw
 - 이미지 파일은 서버에서 재검증하거나 재인코딩한다.
 - 첨부파일은 직접 URL이 아닌 보호된 다운로드 경로를 통해서만 제공한다.
 - 다운로드 시 게시글 접근 권한을 다시 검증한다.
+- 운영 환경에서는 업로드 저장 디렉터리에 실행 권한이 없도록 서버 설정을 분리하고, 파일 시그니처 기반 검증을 추가 적용하는 것이 바람직하다.
 
 ## 수정 코드 예시
 
@@ -180,6 +181,8 @@ private String handleFileUpload(Part filePart, HttpServletRequest request) throw
 - `Content-Type`뿐 아니라 확장자와 실제 이미지 여부까지 함께 검증한다.
 - 첨부파일은 `/board/file?boardId=...` 경로를 통해서만 내려받을 수 있다.
 - 파일 다운로드 시 게시글 접근 권한을 다시 확인해 무단 접근을 차단한다.
+
+현재 예시는 확장자, `Content-Type`, 실제 이미지 디코딩 검증과 웹 루트 외 저장까지 반영한 상태다. 추가적으로 운영 환경에서는 업로드 경로 실행 권한 제거, 파일 시그니처 검증, 악성 업로드 탐지를 위한 모니터링까지 함께 적용하면 더 안전하다.
 
 ## 대응 증적자료
 
