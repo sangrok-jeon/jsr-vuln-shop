@@ -186,7 +186,7 @@
 ![CSRF Payload Request Fixed](images/10-admin-csrf-security/08-csrf-payload-request-fixed.png)
 
 ### 9. 문의 상세에서는 raw HTML은 문자열 그대로 출력되고 plain text URL만 링크로 유지됨
-![Admin Inquiry Rendered As Text Fixed](images/10-admin-csrf-security/09-admin-inquiry-rendered-as-text-fixed.png)
+![Admin Inquiry Rendered As Text Fixed](images/10-admin-csrf-security/09-admin-inquiry-rendered-safely-fixed.png)
 
 ### 10. 링크 클릭 후에도 CSRF 토큰이 없는 요청은 차단됨
 ![CSRF Token Blocked Result](images/10-admin-csrf-security/10-csrf-token-blocked-result.png)
