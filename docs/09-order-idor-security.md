@@ -40,17 +40,17 @@
 ## 취약한 코드 증적자료
 
 ### 1. test001 계정의 주문 내역에서 자신의 주문 확인
-![test001 order history](images/09-order-idor-security/01-test001-order-history.png)
+<img src="images/09-order-idor-security/01-test001-order-history.png" alt="test001 order history" width="900">
 
 ### 2. test001 계정으로 자신의 주문 상세 조회
-![test001 own order detail](images/09-order-idor-security/02-test001-own-order-detail.png)
+<img src="images/09-order-idor-security/02-test001-own-order-detail.png" alt="test001 own order detail" width="900">
 
 ### 3. Burp에서 orderId 값을 41에서 44로 수정하여 전송
-![order detail id modified in burp](images/09-order-idor-security/03-order-detail-id-modified-in-burp.png)
+<img src="images/09-order-idor-security/03-order-detail-id-modified-in-burp.png" alt="order detail id modified in burp" width="900">
 
 ### 4. test001 계정에서 타인(test002)의 주문 상세 정보 노출
 응답 화면에서는 주문번호 `#44`, 주문자 `test002`의 정보가 표시되어, 단순 파라미터 변조만으로 타인 주문 상세가 조회됨을 확인할 수 있다.
-![test001 can view test002 order detail](images/09-order-idor-security/04-test001-can-view-test002-order-detail.png)
+<img src="images/09-order-idor-security/04-test001-can-view-test002-order-detail.png" alt="test001 can view test002 order detail" width="900">
 
 ## 영향
 - 타인의 주문번호, 주문자, 상품명, 결제금액, 배송주소 등 민감한 주문 정보 노출
@@ -108,10 +108,10 @@
 ## 대응 코드 증적자료
 
 ### 5. test002 계정에서 자신의 주문 상세는 정상 조회 가능
-![order detail idor attempt burp](images/09-order-idor-security/07-order-detail-idor-attempt-burp.png)
+<img src="images/09-order-idor-security/07-order-detail-idor-attempt-burp.png" alt="order detail idor attempt burp" width="900">
 
 ### 6. Burp에서 자신의 주문 상세 요청을 가로채 `orderId`를 63에서 41로 수정하여 전송
-![test002 own order detail fixed](images/09-order-idor-security/06-test002-own-order-detail-fixed.png)
+<img src="images/09-order-idor-security/06-test002-own-order-detail-fixed.png" alt="test002 own order detail fixed" width="900">
 
 ### 7. 타인 주문 상세 접근이 차단되고 주문 목록으로 리다이렉트됨
-![order detail idor blocked result](images/09-order-idor-security/08-order-detail-idor-blocked-result.png)
+<img src="images/09-order-idor-security/08-order-detail-idor-blocked-result.png" alt="order detail idor blocked result" width="900">

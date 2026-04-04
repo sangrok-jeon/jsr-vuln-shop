@@ -52,19 +52,19 @@
 
 ## 취약한 코드 증적자료
 1. 마이페이지 비밀번호 변경 화면에서 현재 비밀번호 입력 없이 새 비밀번호만 입력
-   ![01-password-change-form-without-current-password](images/11-password-change-security/01-password-change-form-without-current-password.png)
+   <img src="images/11-password-change-security/01-password-change-form-without-current-password.png" alt="01-password-change-form-without-current-password" width="900">
 
 2. 비밀번호 확인 입력값 불일치 또는 미포함 상태의 요청을 Burp로 전송
-   ![02-password-change-request-without-server-side-confirmation](images/11-password-change-security/02-password-change-request-without-server-side-confirmation.png)
+   <img src="images/11-password-change-security/02-password-change-request-without-server-side-confirmation.png" alt="02-password-change-request-without-server-side-confirmation" width="900">
 
 3. 비밀번호 변경 성공 메시지 확인
-   ![03-password-change-success-vulnerable](images/11-password-change-security/03-password-change-success-vulnerable.png)
+   <img src="images/11-password-change-security/03-password-change-success-vulnerable.png" alt="03-password-change-success-vulnerable" width="900">
 
 4. 변경한 새 비밀번호로 로그인 요청 전송
-   ![04-login-request-with-new-password-vulnerable](images/11-password-change-security/04-login-request-with-new-password-vulnerable.png)
+   <img src="images/11-password-change-security/04-login-request-with-new-password-vulnerable.png" alt="04-login-request-with-new-password-vulnerable" width="900">
 
 5. 변경한 새 비밀번호로 재로그인 성공
-   ![05-login-success-with-new-password-vulnerable](images/11-password-change-security/05-login-success-with-new-password-vulnerable.png)
+   <img src="images/11-password-change-security/05-login-success-with-new-password-vulnerable.png" alt="05-login-success-with-new-password-vulnerable" width="900">
 
 ## 영향
 - 현재 비밀번호를 모르는 상태에서도 로그인 세션만 확보되면 계정 비밀번호를 임의로 변경할 수 있다.
@@ -113,16 +113,16 @@
 
 ## 대응 코드 증적자료
 1. 현재 비밀번호 입력란이 추가된 비밀번호 변경 화면
-   ![06-password-change-form-with-current-password-fixed](images/11-password-change-security/06-password-change-form-with-current-password-fixed.png)
+   <img src="images/11-password-change-security/06-password-change-form-with-current-password-fixed.png" alt="06-password-change-form-with-current-password-fixed" width="900">
 
 2. 비밀번호 변경 요청에 `currentPassword`가 함께 전송되는 것을 확인
-   ![07-password-change-request-with-current-password-fixed](images/11-password-change-security/07-password-change-request-with-current-password-fixed.png)
+   <img src="images/11-password-change-security/07-password-change-request-with-current-password-fixed.png" alt="07-password-change-request-with-current-password-fixed" width="900">
 
 3. 올바른 현재 비밀번호와 일치하는 새 비밀번호 입력 시 정상 변경
-   ![08-password-change-success-fixed](images/11-password-change-security/08-password-change-success-fixed.png)
+   <img src="images/11-password-change-security/08-password-change-success-fixed.png" alt="08-password-change-success-fixed" width="900">
 
 4. 잘못된 현재 비밀번호를 포함한 요청 전송
-   ![09-password-change-invalid-current-blocked](images/11-password-change-security/09-password-change-invalid-current-blocked.png)
+   <img src="images/11-password-change-security/09-password-change-invalid-current-blocked.png" alt="09-password-change-invalid-current-blocked" width="900">
 
 5. 현재 비밀번호가 일치하지 않으면 오류 메시지와 함께 차단
-   ![10-invalid-current-password-error-fixed](images/11-password-change-security/10-invalid-current-password-error-fixed.png)
+   <img src="images/11-password-change-security/10-invalid-current-password-error-fixed.png" alt="10-invalid-current-password-error-fixed" width="900">

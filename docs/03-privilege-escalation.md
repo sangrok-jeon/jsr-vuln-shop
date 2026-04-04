@@ -82,26 +82,26 @@ private boolean checkLogin(HttpServletRequest request, HttpServletResponse respo
 
 - 마이페이지 상단 역할 표시가 `USER`인 상태를 확인하였다.
 
-![권한 상승 전 USER 상태](images/03-privilege-escalation/02-mypage-user-role-before-tampering.png)
+<img src="images/03-privilege-escalation/02-mypage-user-role-before-tampering.png" alt="권한 상승 전 USER 상태" width="900">
 
 ### 2. 권한 변조 대상 파라미터 확인
 
 - 일반 사용자의 마이페이지 수정 요청에 `userId=51`, `role=USER`가 포함되어 있음을 확인하였다.
 - 이 요청에서 `role` 파라미터가 실제 권한 변조 대상이므로 Burp Suite에서 `USER`를 `ADMIN`으로 변경해 전송할 수 있다.
 
-![권한 변조 대상 role 파라미터 확인](images/03-privilege-escalation/01-mypage-update-original-request.png)
+<img src="images/03-privilege-escalation/01-mypage-update-original-request.png" alt="권한 변조 대상 role 파라미터 확인" width="900">
 
 ### 3. 권한 상승 후 관리자 권한 반영
 
 - 요청 변조 후 마이페이지 역할 표시가 `admin`으로 변경되었고, 관리자 메뉴가 노출되었다.
 
-![권한 상승 후 관리자 반영](images/03-privilege-escalation/03-mypage-admin-role-reflected.png)
+<img src="images/03-privilege-escalation/03-mypage-admin-role-reflected.png" alt="권한 상승 후 관리자 반영" width="900">
 
 ### 4. 관리자 대시보드 접근 성공
 
 - 일반 사용자 계정이 관리자 대시보드에 실제로 접근되는 것을 확인하였다.
 
-![관리자 대시보드 접근 성공](images/03-privilege-escalation/04-admin-dashboard-access-success.png)
+<img src="images/03-privilege-escalation/04-admin-dashboard-access-success.png" alt="관리자 대시보드 접근 성공" width="900">
 
 ## 영향
 
@@ -177,28 +177,28 @@ private boolean checkAdmin(HttpServletRequest request, HttpServletResponse respo
 
 - 대응 코드 적용 후 마이페이지 수정 요청에는 `email`, `address`, `phone`만 포함되고 `role`, `userId`가 더 이상 전송되지 않는다.
 
-![정상 요청에서 role 파라미터 제거 확인](images/03-privilege-escalation/05-mypage-update-request-without-role.png)
+<img src="images/03-privilege-escalation/05-mypage-update-request-without-role.png" alt="정상 요청에서 role 파라미터 제거 확인" width="900">
 
 ### 2. `role=ADMIN` 강제 추가 시도
 
 - Burp Suite에서 `role=ADMIN` 파라미터를 수동으로 추가해 다시 전송하였다.
 
-![role=ADMIN 강제 추가 시도](images/03-privilege-escalation/06-role-admin-parameter-tampering-attempt.png)
+<img src="images/03-privilege-escalation/06-role-admin-parameter-tampering-attempt.png" alt="role=ADMIN 강제 추가 시도" width="900">
 
 ### 3. 권한 상승 차단 확인
 
 - 변조 요청 이후에도 마이페이지 역할 표시는 여전히 `user`로 유지되었다.
 
-![권한 상승 차단 후 user 유지](images/03-privilege-escalation/07-user-role-maintained-after-tampering.png)
+<img src="images/03-privilege-escalation/07-user-role-maintained-after-tampering.png" alt="권한 상승 차단 후 user 유지" width="900">
 
 ### 4. 관리자 대시보드 직접 접근 시도
 
 - 일반 사용자 세션으로 `/jsr/admin/dashboard`에 직접 접근을 시도하였다.
 
-![관리자 대시보드 직접 접근 시도](images/03-privilege-escalation/08-admin-dashboard-direct-access-attempt.png)
+<img src="images/03-privilege-escalation/08-admin-dashboard-direct-access-attempt.png" alt="관리자 대시보드 직접 접근 시도" width="900">
 
 ### 5. 관리자 대시보드 접근 차단
 
 - 직접 접근 시 관리자 대시보드가 표시되지 않고 `/jsr/products`로 리다이렉트되는 것을 확인하였다.
 
-![관리자 대시보드 접근 차단 후 products 이동](images/03-privilege-escalation/09-admin-dashboard-access-blocked-products.png)
+<img src="images/03-privilege-escalation/09-admin-dashboard-access-blocked-products.png" alt="관리자 대시보드 접근 차단 후 products 이동" width="900">

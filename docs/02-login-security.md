@@ -26,9 +26,9 @@
 - 예시: `test'--`
 - `--`, `#`, `/**/` 등 일부 주석 패턴이 제거되어 우회가 실패한다.
 
-![주석 기반 우회 입력 화면](images/02-login/01-comment-based-bypass-failure-input.png)
+<img src="images/02-login/01-comment-based-bypass-failure-input.png" alt="주석 기반 우회 입력 화면" width="900">
 
-![주석 기반 우회 실패 디버그 로그](images/02-login/02-comment-based-bypass-failure-debug-log.png)
+<img src="images/02-login/02-comment-based-bypass-failure-debug-log.png" alt="주석 기반 우회 실패 디버그 로그" width="900">
 
 ### 3. OR 조건 기반 우회는 성공
 
@@ -36,19 +36,19 @@
 - 주석 제거 방식만으로는 boolean-based 조건 우회를 막지 못한다.
 - 조건식이 참이 되면서 인증 우회가 발생한다.
 
-![OR 조건 기반 우회 입력 화면](images/02-login/03-or-based-bypass-success-input.png)
+<img src="images/02-login/03-or-based-bypass-success-input.png" alt="OR 조건 기반 우회 입력 화면" width="900">
 
 ### 4. OR 조건 기반 우회 성공 디버그 로그
 
 - 동일 입력이 필터를 우회해 로그인 성공으로 이어지는 로그를 확인할 수 있다.
 
-![OR 조건 기반 우회 성공 디버그 로그](images/02-login/04-or-based-bypass-success-debug-log.png)
+<img src="images/02-login/04-or-based-bypass-success-debug-log.png" alt="OR 조건 기반 우회 성공 디버그 로그" width="900">
 
 ### 5. 로그인 우회 후 상품 페이지 진입
 
 - OR 조건 기반 입력 이후 로그인 우회가 발생하면 상품 페이지로 이동한다.
 
-![로그인 우회 성공 후 상품 페이지](images/02-login/05-login-bypass-success-products-page.png)
+<img src="images/02-login/05-login-bypass-success-products-page.png" alt="로그인 우회 성공 후 상품 페이지" width="900">
 
 ## 확인 로그
 
@@ -178,22 +178,22 @@ if (rs.next() && PasswordUtil.matches(password, rs.getString("PASSWORD"))) {
 
 - 대응 코드 적용 후 동일한 OR 조건 기반 입력으로 다시 로그인 시도를 수행하였다.
 
-![OR 조건 기반 우회 입력 시도](images/02-login/06-or-based-bypass-attempt-fixed.png)
+<img src="images/02-login/06-or-based-bypass-attempt-fixed.png" alt="OR 조건 기반 우회 입력 시도" width="900">
 
 ### 2. OR 조건 기반 우회 실패
 
 - 동일 입력에 대해 로그인 실패 메시지가 출력되며 인증 우회가 발생하지 않음을 확인하였다.
 
-![OR 조건 기반 우회 실패 결과](images/02-login/07-or-based-bypass-failed-result.png)
+<img src="images/02-login/07-or-based-bypass-failed-result.png" alt="OR 조건 기반 우회 실패 결과" width="900">
 
 ### 3. 정상 계정 로그인 입력
 
 - 정상 계정 정보로 로그인 시도를 수행하였다.
 
-![정상 계정 로그인 입력](images/02-login/08-normal-login-input.png)
+<img src="images/02-login/08-normal-login-input.png" alt="정상 계정 로그인 입력" width="900">
 
 ### 4. 정상 계정 로그인 성공
 
 - 정상 계정은 기존과 같이 상품 페이지로 로그인된다.
 
-![정상 계정 로그인 성공](images/02-login/09-normal-login-success-products-page.png)
+<img src="images/02-login/09-normal-login-success-products-page.png" alt="정상 계정 로그인 성공" width="900">

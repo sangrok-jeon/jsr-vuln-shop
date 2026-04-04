@@ -89,27 +89,27 @@ private String handleFileUpload(Part filePart, HttpServletRequest request) throw
 
 ### 1. 기본 JSP 파일 선택
 
-![기본 JSP 파일 선택](images/05-file-upload-security/01-plain-jsp-file-selected.png)
+<img src="images/05-file-upload-security/01-plain-jsp-file-selected.png" alt="기본 JSP 파일 선택" width="900">
 
 ### 2. 기본 업로드 요청 확인
 
-![기본 업로드 요청 확인](images/05-file-upload-security/02-plain-jsp-upload-request.png)
+<img src="images/05-file-upload-security/02-plain-jsp-upload-request.png" alt="기본 업로드 요청 확인" width="900">
 
 ### 3. 기본 업로드 실패 결과
 
-![기본 업로드 실패 결과](images/05-file-upload-security/03-plain-jsp-upload-failed.png)
+<img src="images/05-file-upload-security/03-plain-jsp-upload-failed.png" alt="기본 업로드 실패 결과" width="900">
 
 ### 4. Content-Type 변조 요청
 
-![Content-Type 변조 요청](images/05-file-upload-security/04-content-type-tampering-upload-request.png)
+<img src="images/05-file-upload-security/04-content-type-tampering-upload-request.png" alt="Content-Type 변조 요청" width="900">
 
 ### 5. 업로드된 첨부 링크 노출
 
-![업로드된 첨부 링크 노출](images/05-file-upload-security/05-uploaded-webshell-link-exposed.png)
+<img src="images/05-file-upload-security/05-uploaded-webshell-link-exposed.png" alt="업로드된 첨부 링크 노출" width="900">
 
 ### 6. 업로드 파일 실행 결과 확인
 
-![업로드 파일 실행 결과 확인](images/05-file-upload-security/06-webshell-execution-confirmed.png)
+<img src="images/05-file-upload-security/06-webshell-execution-confirmed.png" alt="업로드 파일 실행 결과 확인" width="900">
 
 ## 영향
 
@@ -188,28 +188,28 @@ private String handleFileUpload(Part filePart, HttpServletRequest request) throw
 
 ### 1. 정상 이미지 업로드 성공
 
-![정상 이미지 업로드 성공](images/05-file-upload-security/07-safe-image-upload-success.png)
+<img src="images/05-file-upload-security/07-safe-image-upload-success.png" alt="정상 이미지 업로드 성공" width="900">
 
 ### 2. 보호된 첨부 링크 제공
 
-![보호된 첨부 링크 제공](images/05-file-upload-security/08-protected-file-link.png)
+<img src="images/05-file-upload-security/08-protected-file-link.png" alt="보호된 첨부 링크 제공" width="900">
 
 ### 3. 소유자 기준 다운로드 성공
 
-![소유자 기준 다운로드 성공](images/05-file-upload-security/09-owner-file-download-success.png)
+<img src="images/05-file-upload-security/09-owner-file-download-success.png" alt="소유자 기준 다운로드 성공" width="900">
 
 ### 4. 권한 없는 사용자 접근 시도
 
-![권한 없는 사용자 접근 시도](images/05-file-upload-security/10-unauthorized-file-access-attempt.png)
+<img src="images/05-file-upload-security/10-unauthorized-file-access-attempt.png" alt="권한 없는 사용자 접근 시도" width="900">
 
 ### 5. 권한 없는 사용자 접근 차단
 
-![권한 없는 사용자 접근 차단](images/05-file-upload-security/11-unauthorized-file-access-blocked.png)
+<img src="images/05-file-upload-security/11-unauthorized-file-access-blocked.png" alt="권한 없는 사용자 접근 차단" width="900">
 
 ### 6. 위험한 파일 업로드 시도
 
-![위험한 파일 업로드 시도](images/05-file-upload-security/12-dangerous-file-upload-attempt.png)
+<img src="images/05-file-upload-security/12-dangerous-file-upload-attempt.png" alt="위험한 파일 업로드 시도" width="900">
 
 ### 7. 위험한 파일 업로드 차단
 
-![위험한 파일 업로드 차단](images/05-file-upload-security/13-dangerous-file-upload-blocked.png)
+<img src="images/05-file-upload-security/13-dangerous-file-upload-blocked.png" alt="위험한 파일 업로드 차단" width="900">

@@ -75,22 +75,22 @@
 ## 취약한 코드 증적자료
 
 ### 1. 공격자가 준비한 외부 CSRF 페이지
-![CSRF Page Code](images/10-admin-csrf-security/01-csrf-page-code.png)
+<img src="images/10-admin-csrf-security/01-csrf-page-code.png" alt="CSRF Page Code" width="900">
 
 ### 2. 관리자 포인트 변경 전 상태
-![Admin Point Before CSRF](images/10-admin-csrf-security/02-admin-point-before-csrf.png)
+<img src="images/10-admin-csrf-security/02-admin-point-before-csrf.png" alt="Admin Point Before CSRF" width="900">
 
 ### 3. 공격자가 문의글에 악성 링크를 삽입하여 등록
-![Inquiry Write With Malicious Link](images/10-admin-csrf-security/03-inquiry-write-with-malicious-link.png)
+<img src="images/10-admin-csrf-security/03-inquiry-write-with-malicious-link.png" alt="Inquiry Write With Malicious Link" width="900">
 
 ### 4. 관리자가 문의글을 열었을 때 악성 링크가 그대로 노출됨
-![Admin Opened Inquiry With Link](images/10-admin-csrf-security/04-admin-opened-inquiry-with-link.png)
+<img src="images/10-admin-csrf-security/04-admin-opened-inquiry-with-link.png" alt="Admin Opened Inquiry With Link" width="900">
 
 ### 5. 링크 클릭 후 관리자 포인트가 실제로 변경됨
-![Admin Point Changed After CSRF](images/10-admin-csrf-security/05-admin-point-changed-after-csrf.png)
+<img src="images/10-admin-csrf-security/05-admin-point-changed-after-csrf.png" alt="Admin Point Changed After CSRF" width="900">
 
 ### 6. 외부 서버가 관리자 요청을 수신한 기록
-![Attacker Server Request Received](images/10-admin-csrf-security/06-attacker-server-request-received.png)
+<img src="images/10-admin-csrf-security/06-attacker-server-request-received.png" alt="Attacker Server Request Received" width="900">
 
 ## 영향
 - 로그인된 관리자 세션을 이용해 의도하지 않은 포인트 사용 요청을 발생시킬 수 있다.
@@ -183,16 +183,16 @@
 ## 대응 코드 증적자료
 
 ### 7. 대응 후 문의 작성 시 raw HTML과 plain text URL을 함께 입력
-![Inquiry Write With Safe Link Fixed](images/10-admin-csrf-security/07-inquiry-write-with-safe-link-fixed.png)
+<img src="images/10-admin-csrf-security/07-inquiry-write-with-safe-link-fixed.png" alt="Inquiry Write With Safe Link Fixed" width="900">
 
 ### 8. 요청에는 여전히 raw HTML과 plain text URL이 함께 전달됨
-![CSRF Payload Request Fixed](images/10-admin-csrf-security/08-csrf-payload-request-fixed.png)
+<img src="images/10-admin-csrf-security/08-csrf-payload-request-fixed.png" alt="CSRF Payload Request Fixed" width="900">
 
 ### 9. 문의 상세에서는 raw HTML은 문자열 그대로 출력되고 plain text URL만 링크로 유지됨
-![Admin Inquiry Rendered As Text Fixed](images/10-admin-csrf-security/09-admin-inquiry-rendered-safely-fixed.png)
+<img src="images/10-admin-csrf-security/09-admin-inquiry-rendered-safely-fixed.png" alt="Admin Inquiry Rendered As Text Fixed" width="900">
 
 ### 10. 링크 클릭 후에도 CSRF 토큰이 없는 요청은 차단됨
-![CSRF Token Blocked Result](images/10-admin-csrf-security/10-csrf-token-blocked-result.png)
+<img src="images/10-admin-csrf-security/10-csrf-token-blocked-result.png" alt="CSRF Token Blocked Result" width="900">
 
 ### 11. 외부 HTTP 서버 로그에는 단순 링크 접근만 남고 상태 변경은 발생하지 않음
-![HTTP Server Request Log Fixed](images/10-admin-csrf-security/11-http-server-request-log-fixed.png)
+<img src="images/10-admin-csrf-security/11-http-server-request-log-fixed.png" alt="HTTP Server Request Log Fixed" width="900">

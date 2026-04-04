@@ -84,19 +84,19 @@ if (path.contains("charge")) {
 ## 취약한 코드 증적자료
 
 ### 1. 프론트엔드에서 1회 최대 100,000P 제한이 표시됨
-![frontend charge limit warning](images/06-point-charge-security/01-frontend-charge-limit-warning.png)
+<img src="images/06-point-charge-security/01-frontend-charge-limit-warning.png" alt="frontend charge limit warning" width="900">
 
 ### 2. Burp를 통해 충전 요청 금액을 초과 값으로 변조
-![point charge tampering request](images/06-point-charge-security/02-point-charge-tampering-request.png)
+<img src="images/06-point-charge-security/02-point-charge-tampering-request.png" alt="point charge tampering request" width="900">
 
 ### 3. 변조 요청 이후 최대 한도를 초과한 포인트가 반영됨
-![over limit point charge success](images/06-point-charge-security/03-over-limit-point-charge-success.png)
+<img src="images/06-point-charge-security/03-over-limit-point-charge-success.png" alt="over limit point charge success" width="900">
 
 ### 4. 보유 포인트를 초과하는 사용 금액 입력
-![excessive point use input](images/06-point-charge-security/04-excessive-point-use-input.png)
+<img src="images/06-point-charge-security/04-excessive-point-use-input.png" alt="excessive point use input" width="900">
 
 ### 5. 포인트 사용 이후 음수 잔액이 발생함
-![negative point balance result](images/06-point-charge-security/05-negative-point-balance-result.png)
+<img src="images/06-point-charge-security/05-negative-point-balance-result.png" alt="negative point balance result" width="900">
 
 ## 영향
 - 포인트 충전 정책 무력화
@@ -169,22 +169,22 @@ if (path.contains("charge")) {
 ## 대응 증적자료
 
 ### 1. 프론트엔드에서 1회 최대 100,000P 제한이 그대로 표시됨
-![frontend charge limit warning fixed](images/06-point-charge-security/06-frontend-charge-limit-warning-fixed.png)
+<img src="images/06-point-charge-security/06-frontend-charge-limit-warning-fixed.png" alt="frontend charge limit warning fixed" width="900">
 
 ### 2. 정상 범위 충전은 성공함
-![normal charge success fixed](images/06-point-charge-security/07-normal-charge-success-fixed.png)
+<img src="images/06-point-charge-security/07-normal-charge-success-fixed.png" alt="normal charge success fixed" width="900">
 
 ### 3. Burp를 통해 과도한 충전 요청을 다시 시도
-![over limit charge attempt burp](images/06-point-charge-security/08-over-limit-charge-attempt-burp.png)
+<img src="images/06-point-charge-security/08-over-limit-charge-attempt-burp.png" alt="over limit charge attempt burp" width="900">
 
 ### 4. 최대 보유 포인트 초과 요청이 차단됨
-![max point charge blocked result](images/06-point-charge-security/09-max-point-charge-blocked-result.png)
+<img src="images/06-point-charge-security/09-max-point-charge-blocked-result.png" alt="max point charge blocked result" width="900">
 
 ### 5. 현재 보유 포인트를 초과하는 사용 금액을 입력
-![excessive point use input fixed](images/06-point-charge-security/10-excessive-point-use-input-fixed.png)
+<img src="images/06-point-charge-security/10-excessive-point-use-input-fixed.png" alt="excessive point use input fixed" width="900">
 
 ### 6. Burp를 통해 과도한 사용 요청을 다시 시도
-![excessive point use attempt burp](images/06-point-charge-security/11-excessive-point-use-attempt-burp.png)
+<img src="images/06-point-charge-security/11-excessive-point-use-attempt-burp.png" alt="excessive point use attempt burp" width="900">
 
 ### 7. 현재 보유 포인트 초과 사용 요청이 차단됨
-![point use blocked result](images/06-point-charge-security/12-point-use-blocked-result.png)
+<img src="images/06-point-charge-security/12-point-use-blocked-result.png" alt="point use blocked result" width="900">

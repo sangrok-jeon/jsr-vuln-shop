@@ -78,19 +78,19 @@ response.addCookie(cookie);
 ## 취약한 코드 증적자료
 
 ### 1. 리뷰 입력란에 XSS 페이로드 삽입
-![review xss input](images/08-stored-xss-security/01-review-xss-input.png)
+<img src="images/08-stored-xss-security/01-review-xss-input.png" alt="review xss input" width="900">
 
 ### 2. 저장된 스크립트가 상품 상세 페이지에서 실행
-![stored xss alert](images/08-stored-xss-security/02-stored-xss-alert.png)
+<img src="images/08-stored-xss-security/02-stored-xss-alert.png" alt="stored xss alert" width="900">
 
 ### 3. 다른 계정에서 동일 상품 상세 페이지 조회 시 저장된 리뷰 확인
-![stored xss review visible](images/08-stored-xss-security/03-stored-xss-review-visible.png)
+<img src="images/08-stored-xss-security/03-stored-xss-review-visible.png" alt="stored xss review visible" width="900">
 
 ### 4. 외부 요청 전송 확인용 페이로드 입력
-![xss external request payload](images/08-stored-xss-security/04-xss-external-request-payload.png)
+<img src="images/08-stored-xss-security/04-xss-external-request-payload.png" alt="xss external request payload" width="900">
 
 ### 5. 로컬 테스트 환경에서 외부 요청 수신 및 쿠키 값 확인
-![xss external request received](images/08-stored-xss-security/05-xss-external-request-received.png)
+<img src="images/08-stored-xss-security/05-xss-external-request-received.png" alt="xss external request received" width="900">
 
 ## 영향
 - 다른 사용자가 상품 상세 페이지를 조회하는 순간 공격자가 저장한 스크립트가 브라우저에서 실행될 수 있다.
@@ -139,18 +139,18 @@ if ("ADMIN".equals(loginUser.getRole())) {
 
 ## 대응 증적자료
 ### 1. `alert` 기반 XSS 페이로드 입력 시도
-![alert payload input fixed](images/08-stored-xss-security/06-alert-payload-input-fixed.png)
+<img src="images/08-stored-xss-security/06-alert-payload-input-fixed.png" alt="alert payload input fixed" width="900">
 
 ### 2. 입력한 스크립트가 실행되지 않고 문자열 그대로 저장됨
-![alert payload rendered as text](images/08-stored-xss-security/07-alert-payload-rendered-as-text.png)
+<img src="images/08-stored-xss-security/07-alert-payload-rendered-as-text.png" alt="alert payload rendered as text" width="900">
 
 ### 3. 외부 요청 전송용 페이로드 입력 시도
-![cookie payload input fixed](images/08-stored-xss-security/08-cookie-payload-input-fixed.png)
+<img src="images/08-stored-xss-security/08-cookie-payload-input-fixed.png" alt="cookie payload input fixed" width="900">
 
 ### 4. 외부 요청 전송용 페이로드도 문자열 그대로 출력됨
-![cookie payload rendered as text](images/08-stored-xss-security/09-cookie-payload-rendered-as-text.png)
+<img src="images/08-stored-xss-security/09-cookie-payload-rendered-as-text.png" alt="cookie payload rendered as text" width="900">
 
 ### 5. 외부 수신 대기 서버에 추가 요청이 도달하지 않음
-![no external request received](images/08-stored-xss-security/10-no-external-request-received.png)
+<img src="images/08-stored-xss-security/10-no-external-request-received.png" alt="no external request received" width="900">
 
 즉 대응 이후에는 리뷰에 입력된 `<script>`가 더 이상 브라우저에서 실행되지 않고, 상품 상세 페이지에는 문자열 그대로만 출력된다. 따라서 `alert` 실행도 발생하지 않으며, 외부 수신 서버로의 추가 요청 전송도 확인되지 않는다.

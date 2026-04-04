@@ -38,7 +38,7 @@ ps.executeUpdate();
 
 ### 1. 회원가입 입력 화면
 
-![회원가입 입력 화면](images/01-register/01-register-form-filled.png)
+<img src="images/01-register/01-register-form-filled.png" alt="회원가입 입력 화면" width="900">
 
 ### 2. DB 평문 저장 확인
 
@@ -48,7 +48,7 @@ FROM JSR_USERS
 WHERE USERNAME = 'jsrTest';
 ```
 
-![평문 비밀번호 저장 확인](images/01-register/03-db-plaintext-password.png)
+<img src="images/01-register/03-db-plaintext-password.png" alt="평문 비밀번호 저장 확인" width="900">
 
 ## 영향
 
@@ -133,7 +133,7 @@ if (rs.next() && PasswordUtil.matches(password, rs.getString("PASSWORD"))) {
 
 ### 1. 회원가입 입력 화면
 
-![대응 후 회원가입 입력 화면](images/01-register/04-register-form-filled-fixed.png)
+<img src="images/01-register/04-register-form-filled-fixed.png" alt="대응 후 회원가입 입력 화면" width="900">
 
 ### 2. DB 해시 저장 확인
 
@@ -143,7 +143,7 @@ FROM JSR_USERS
 WHERE USERNAME = 'test001';
 ```
 
-![해시 비밀번호 저장 확인](images/01-register/05-db-hashed-password.png)
+<img src="images/01-register/05-db-hashed-password.png" alt="해시 비밀번호 저장 확인" width="900">
 
 ## 확인 내용
 

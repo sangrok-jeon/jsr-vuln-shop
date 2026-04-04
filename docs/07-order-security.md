@@ -75,19 +75,19 @@ ps.setInt(1, totalPrice);
 ## 취약한 코드 증적자료
 
 ### 1. 상품 상세에서 원래 가격 확인
-![original product price](images/07-order-security/01-original-product-price.png)
+<img src="images/07-order-security/01-original-product-price.png" alt="original product price" width="900">
 
 ### 2. 주문 원본 요청 확인
-![order request original](images/07-order-security/02-order-request-original.png)
+<img src="images/07-order-security/02-order-request-original.png" alt="order request original" width="900">
 
 ### 3. Burp를 통해 가격 요청값을 변조
-![order request price tampered](images/07-order-security/03-order-request-price-tampered.png)
+<img src="images/07-order-security/03-order-request-price-tampered.png" alt="order request price tampered" width="900">
 
 ### 4. 변조된 값으로 `0원` 주문 완료
-![zero price order success](images/07-order-security/04-zero-price-order-success.png)
+<img src="images/07-order-security/04-zero-price-order-success.png" alt="zero price order success" width="900">
 
 ### 5. 주문 내역에도 `0원` 반영
-![zero price order history](images/07-order-security/05-zero-price-order-history.png)
+<img src="images/07-order-security/05-zero-price-order-history.png" alt="zero price order history" width="900">
 
 ## 영향
 - 고가 상품을 비정상적으로 낮은 금액으로 주문 가능
@@ -151,19 +151,19 @@ ps.setInt(1, serverTotal);
 ## 대응 증적자료
 
 ### 6. 고가 상품 상세 화면 확인
-![high price product detail fixed](images/07-order-security/06-high-price-product-detail-fixed.png)
+<img src="images/07-order-security/06-high-price-product-detail-fixed.png" alt="high price product detail fixed" width="900">
 
 ### 7. 가격 변조 요청 시도
-![price tampering request fixed](images/07-order-security/07-price-tampering-request-fixed.png)
+<img src="images/07-order-security/07-price-tampering-request-fixed.png" alt="price tampering request fixed" width="900">
 
 ### 8. 서버가 실제 가격으로 다시 계산하여 주문 차단
-![price tampering blocked result](images/07-order-security/08-price-tampering-blocked-result.png)
+<img src="images/07-order-security/08-price-tampering-blocked-result.png" alt="price tampering blocked result" width="900">
 
 ### 9. 정상 결제용 저가 상품 상세 화면
-![low price product detail fixed](images/07-order-security/09-low-price-product-detail-fixed.png)
+<img src="images/07-order-security/09-low-price-product-detail-fixed.png" alt="low price product detail fixed" width="900">
 
 ### 10. 정상 상품 주문 완료
-![normal order success fixed](images/07-order-security/10-normal-order-success-fixed.png)
+<img src="images/07-order-security/10-normal-order-success-fixed.png" alt="normal order success fixed" width="900">
 
 ### 11. 주문 내역에 정상 가격 반영
-![order history correct price](images/07-order-security/11-order-history-correct-price.png)
+<img src="images/07-order-security/11-order-history-correct-price.png" alt="order history correct price" width="900">

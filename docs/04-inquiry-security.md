@@ -85,31 +85,31 @@
 
 - `test001` 계정으로 작성한 문의글 `#9`의 상세 화면이다.
 
-![원본 문의 상세 확인](images/04-inquiry-security/01-original-inquiry-detail.png)
+<img src="images/04-inquiry-security/01-original-inquiry-detail.png" alt="원본 문의 상세 확인" width="900">
 
 ### 2. 다른 사용자에 의한 수정 페이지 접근
 
 - `test002` 계정으로 `/board/edit?boardId=9`에 직접 접근한 화면이다.
 
-![다른 사용자에 의한 수정 페이지 접근](images/04-inquiry-security/02-unauthorized-edit-access.png)
+<img src="images/04-inquiry-security/02-unauthorized-edit-access.png" alt="다른 사용자에 의한 수정 페이지 접근" width="900">
 
 ### 3. 수정 결과 반영 확인
 
 - `test001` 계정으로 다시 확인했을 때 내용이 `test002가 수정함.`으로 변경된 것을 확인하였다.
 
-![수정 결과 반영 확인](images/04-inquiry-security/03-inquiry-modified-result.png)
+<img src="images/04-inquiry-security/03-inquiry-modified-result.png" alt="수정 결과 반영 확인" width="900">
 
 ### 4. 다른 사용자에 의한 삭제 성공
 
 - `test002` 계정으로 `/board/delete?boardId=9` 요청을 수행해 삭제가 성공한 화면이다.
 
-![다른 사용자에 의한 삭제 성공](images/04-inquiry-security/04-unauthorized-delete-success.png)
+<img src="images/04-inquiry-security/04-unauthorized-delete-success.png" alt="다른 사용자에 의한 삭제 성공" width="900">
 
 ### 5. 원본 작성자의 삭제 결과 확인
 
 - `test001` 계정으로 다시 확인했을 때 문의글이 더 이상 존재하지 않는 것을 확인하였다.
 
-![원본 작성자의 삭제 결과 확인](images/04-inquiry-security/05-inquiry-deleted-confirmed.png)
+<img src="images/04-inquiry-security/05-inquiry-deleted-confirmed.png" alt="원본 작성자의 삭제 결과 확인" width="900">
 
 ## 영향
 
@@ -208,22 +208,22 @@ private boolean canManageBoard(JsrBoard board, JsrUser user, boolean isAdmin) {
 
 - 대응 코드 적용 후 `test001` 계정으로 작성한 문의글 `#10`의 상세 화면이다.
 
-![대응 코드 적용 후 원본 문의 상세 확인](images/04-inquiry-security/06-remediated-inquiry-detail.png)
+<img src="images/04-inquiry-security/06-remediated-inquiry-detail.png" alt="대응 코드 적용 후 원본 문의 상세 확인" width="900">
 
 ### 2. 무단 수정 시도 차단
 
 - `test002` 계정으로 `boardId=10` 수정 접근을 시도했지만 차단된 결과이다.
 
-![무단 수정 시도 차단](images/04-inquiry-security/07-unauthorized-edit-blocked-result.png)
+<img src="images/04-inquiry-security/07-unauthorized-edit-blocked-result.png" alt="무단 수정 시도 차단" width="900">
 
 ### 3. 무단 삭제 시도
 
 - `test002` 계정으로 `boardId=10` 삭제를 직접 시도한 화면이다.
 
-![무단 삭제 시도](images/04-inquiry-security/08-unauthorized-delete-attempt-fixed.png)
+<img src="images/04-inquiry-security/08-unauthorized-delete-attempt-fixed.png" alt="무단 삭제 시도" width="900">
 
 ### 4. 삭제 차단 및 원본 글 유지 확인
 
 - 무단 삭제 시도 후에도 문의글이 그대로 유지되는 것을 확인하였다.
 
-![삭제 차단 및 원본 글 유지 확인](images/04-inquiry-security/09-unauthorized-delete-blocked-result.png)
+<img src="images/04-inquiry-security/09-unauthorized-delete-blocked-result.png" alt="삭제 차단 및 원본 글 유지 확인" width="900">
